@@ -1,0 +1,6 @@
+# core engine needs only the standard library
+google-genai>=1.0     # Gemini extractor (optional: offline parser works without it)
+anthropic>=0.125      # Claude extractor (optional)
+streamlit>=1.50       # web UI
+openpyxl>=3.1         # .xlsx uploads
+odfpy>=1.4            # .ods uploads (the case template is .ods)

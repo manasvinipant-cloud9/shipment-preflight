@@ -1,0 +1,17 @@
+Booking ID,SKU,Description,HS code,Quantity (units),Unit price,Units per carton,Cartons,Unit weight (kg),Country of origin
+BK-001,MUG-01,"Ceramic coffee mug, 350 ml",691200,1080,5,12,90,0.5,United Kingdom
+BK-002,TSH-01,"Cotton t-shirt, assorted sizes",610910,600,4,20,30,0.25,India
+BK-002,SOK-01,"Merino wool socks, pair",611595,800,3.5,40,20,0.12,Turkey
+BK-003,TSH-01,"Cotton t-shirt, assorted sizes",,600,4,20,30,0.25,India
+BK-003,SOK-01,"Merino wool socks, pair",6115,800,3.5,40,20,0.12,Turkey
+BK-004,MUG-01,"Ceramic coffee mug, 350 ml",691200,1080,5,12,90,0.5,United Kingdom
+BK-005,TSH-01,"Cotton t-shirt, assorted sizes",610910,500,4,20,20,0.25,India
+BK-005,SOK-01,"Merino wool socks, pair",611595,800,3.5,40,20,0.12,Turkey
+BK-006,BRK-01,Steel shelf bracket set,731815,2000,4,50,40,0.55,China
+BK-007,PWR-01,Li-ion portable power bank 10000mAh,850760,300,9,30,10,0.25,China
+BK-007,DEO-01,Aerosol deodorant spray 150ml,330720,240,2.5,24,10,0.2,United Kingdom
+BK-008,CND-01,"Soy wax candle, 200 g",340600,400,6,20,20,0.35,Vietnam
+BK-009,JAM-01,"Strawberry jam jar, 340 g",200799,1200,3,24,50,0.45,Turkey
+BK-009,BSC-01,Shortbread biscuit tin,190590,600,4,12,50,0.45,
+BK-010,THN-01,Flammable paint thinner 1L,3814,600,7,12,50,1.0,Germany
+BK-010,GLU-01,Contact adhesive tube,,1000,2,25,40,0.15,

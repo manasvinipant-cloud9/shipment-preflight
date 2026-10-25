@@ -1,0 +1,11 @@
+Booking ID,Seller name,Origin city,Origin country,Destination city,Destination country,Destination type,Ready to ship date,Seller priority,Pallets,Cartons,Total declared value,Currency,Total gross weight (kg),Delivery appointment booked
+BK-001,Northfield Goods,Manchester,United Kingdom,Frankfurt,Germany,Warehouse,05-11-2026,Cheapest,3,90,5400,GBP,620,Yes
+BK-002,Harbour Home Ltd,London,United Kingdom,Paris,France,Business address,09-11-2026,Balanced,2,50,5200.0,GBP,316,No
+BK-003,Kestrel Apparel,Leeds,United Kingdom,Hamburg,Germany,Warehouse,12-11-2026,Cheapest,2,50,5200.0,GBP,316,Yes
+BK-004,Birch & Co,Birmingham,United Kingdom,Amsterdam,Netherlands,Warehouse,10-11-2026,Fastest,2,90,6600,GBP,634,Yes
+BK-005,Pennine Textiles,Leeds,United Kingdom,Lyon,France,Business address,11-11-2026,Balanced,2,55,4800.0,GBP,289,No
+BK-006,Ironbridge Hardware,Birmingham,United Kingdom,Berlin,Germany,Warehouse,13-11-2026,Cheapest,2,40,8000,GBP,1300,Yes
+BK-007,Volt & Spark,London,United Kingdom,Lyon,France,Business address,16-11-2026,Balanced,1,20,3300.0,GBP,158,No
+BK-008,Calder Crafts,Manchester,United Kingdom,Rotterdam,Netherlands,Business address,17-11-2026,Most reliable,1,20,2400,GBP,100,No
+BK-009,Fenwick Foods,London,United Kingdom,Amsterdam,Netherlands,Warehouse,01-10-2026,Fastest,3,100,6000,GBP,950,No
+BK-010,Magpie Trading,Birmingham,United Kingdom,Hamburg,Germany,Warehouse,18-11-2026,Cheapest,3,95,8000,GBP,2400,No

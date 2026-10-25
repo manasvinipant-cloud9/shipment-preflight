@@ -1,0 +1,14 @@
+seller: Northfield Goods
+origin city: Manchester
+destination city: Frankfurt
+country: Germany
+type: Warehouse
+appointment: No
+ready date: 01-12-2026
+pallets: 2
+total cartons: 30
+gross weight: 520
+declared value: 6000
+priority: Balanced
+item A: desc=Cotton t-shirts, hs=610910, qty=1000, price=3, upc=50, cartons=20, weight=0.2, origin=India
+item B: desc=Ceramic mugs, hs=691200, qty=500, price=6, upc=50, cartons=10, weight=0.4, origin=China

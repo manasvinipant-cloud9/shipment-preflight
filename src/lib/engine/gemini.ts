@@ -21,9 +21,10 @@ export function modelChain(): string[] {
 let client: GoogleGenAI | null = null;
 const ai = () => (client ??= new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY }));
 
-// A model that just failed is skipped for a while: 429 = quota (retry later), 404 = retired, others = brief overload.
+// A model that just failed is skipped for a while: 429 = quota, 503 = high demand (5 min), 404 = retired (1 h), others = 45 s.
 const cooldown = new Map<string, number>();
-const coolFor = (msg: string) => (msg.includes('"code":429') ? 5 * 60_000 : msg.includes('"code":404') ? 3600_000 : 45_000);
+const coolFor = (msg: string) =>
+  msg.includes('"code":429') || msg.includes('"code":503') ? 5 * 60_000 : msg.includes('"code":404') ? 3600_000 : 45_000;
 
 const redact = (s: string) => s.replace(/AIza[0-9A-Za-z_-]{10,}/g, "[key]");
 

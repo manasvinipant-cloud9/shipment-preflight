@@ -4,7 +4,7 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import { Conversation, ExtractorError, type Snapshot } from "../engine/conversation";
-import { OPS_SCHEMA, ruleBasedExtract, sanitizeOps } from "../engine/extractor";
+import { OPS_SCHEMA, repairItemOps, ruleBasedExtract, sanitizeOps } from "../engine/extractor";
 import { getExtractor, makeGeminiExtractor, modelChain } from "../engine/gemini";
 
 const TODAY = "2026-10-25";
@@ -39,6 +39,26 @@ describe("sanitizeOps", () => {
     expect(conv.shipment.destination_country).toBeNull();
     expect(conv.shipment.pallets).toBeNull();
     expect(r).toContain("Couldn't use");
+  });
+});
+
+describe("repairItemOps", () => {
+  const mug = { op: "upsert_item", sku: "CERAMIC MUGS", fields: { description: "ceramic mugs", quantity: "1080" } };
+  it("folds a stray HS-code item into the real product", () => {
+    const ops = [mug, { op: "upsert_item", sku: "691200", fields: { hs_code: "691200" } }, { op: "set", field: "pallets", value: "2" }];
+    expect(repairItemOps(ops)).toEqual([
+      { op: "upsert_item", sku: "CERAMIC MUGS", fields: { hs_code: "691200", description: "ceramic mugs", quantity: "1080" } },
+      { op: "set", field: "pallets", value: "2" },
+    ]);
+  });
+  it("handles the stray coming first, and leaves genuine numeric SKUs alone", () => {
+    const first = repairItemOps([{ op: "upsert_item", sku: "691200", fields: { hs_code: "691200" } }, mug]);
+    expect(first).toHaveLength(1);
+    expect((first[0].fields as Record<string, string>).hs_code).toBe("691200");
+    const real = [{ op: "upsert_item", sku: "10234", fields: { description: "Widget", quantity: "5" } }, mug];
+    expect(repairItemOps(real)).toEqual(real); // has a description: a real SKU, not a stray
+    const lone = [{ op: "upsert_item", sku: "691200", fields: { hs_code: "691200" } }];
+    expect(repairItemOps(lone)).toEqual(lone); // nothing to merge into
   });
 });
 

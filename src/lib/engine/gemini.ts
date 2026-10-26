@@ -3,7 +3,7 @@
 // Server-only: this file must never be imported by client components (it reads the API key).
 import { GoogleGenAI, ThinkingLevel } from "@google/genai";
 import { ExtractorError, type Extractor, type Op, type Snapshot } from "./conversation";
-import { OPS_SCHEMA, SYSTEM_PROMPT, parseModelJson, ruleBasedExtract, sanitizeOps } from "./extractor";
+import { OPS_SCHEMA, SYSTEM_PROMPT, parseModelJson, repairItemOps, ruleBasedExtract, sanitizeOps } from "./extractor";
 
 // Measured on the real extraction prompt (see /api/status?probe=extract): gemini-3-flash-preview captured every field in
 // every run in ~1.7 s; gemini-3.7-flash was returning 503 "high demand". Override with GEMINI_MODEL.
@@ -82,7 +82,7 @@ export function makeGeminiExtractor(generate: Generate = realGenerate, models: (
         try {
           const raw = await generate(model, payload, v);
           if (!raw) throw new ExtractorError("Gemini returned no text");
-          return sanitizeOps(parseModelJson(raw));
+          return repairItemOps(sanitizeOps(parseModelJson(raw)));
         } catch (e) {
           const msg = e instanceof Error ? e.message : String(e);
           console.warn(`[gemini] ${model} (schema=${v.schema}, thinking=${v.thinking}) failed: ${redact(msg).slice(0, 200)}`);
@@ -138,7 +138,7 @@ export async function probeModels(): Promise<ProbeResult[]> {
   return results;
 }
 
-export interface ExtractProbe { model: string; ok: boolean; ms: number; ops?: number; fields?: string[]; raw?: string; error?: string }
+export interface ExtractProbe { model: string; ok: boolean; ms: number; ops?: number; fields?: string[]; items?: string[]; raw?: string; error?: string }
 
 let extractCache: { at: number; level: string; results: ExtractProbe[] } | null = null;
 const PROBE_MESSAGE = "I need to send 2 pallets of ceramic mugs from Manchester to a warehouse in Frankfurt, ready on 9 November 2026. " +
@@ -153,9 +153,9 @@ export async function probeExtraction(level = "default"): Promise<ExtractProbe[]
     const t0 = Date.now();
     try {
       const raw = await realGenerate(model, payload, VARIANTS[0], level === "default" ? undefined : level);
-      const ops = sanitizeOps(parseModelJson(raw ?? ""));
+      const ops = repairItemOps(sanitizeOps(parseModelJson(raw ?? "")));
       const fields = ops.flatMap((o) => (o.op === "set" ? [String(o.field)] : o.op === "upsert_item" ? Object.keys((o.fields as object) ?? {}).map((k) => `item.${k}`) : []));
-      return { model, ok: true, ms: Date.now() - t0, ops: ops.length, fields, raw: (raw ?? "").replace(/\s+/g, " ").slice(0, 1200) };
+      return { model, ok: true, ms: Date.now() - t0, ops: ops.length, fields, items: ops.filter((o) => o.op === "upsert_item").map((o) => String(o.sku)), raw: (raw ?? "").replace(/\s+/g, " ").slice(0, 1200) };
     } catch (e) {
       return { model, ok: false, ms: Date.now() - t0, error: redact(e instanceof Error ? e.message : String(e)).slice(0, 160) };
     }

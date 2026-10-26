@@ -1,9 +1,8 @@
 "use client";
 import { useRef, useState } from "react";
-import { DEFAULT_RATE_CARD } from "@/lib/engine/carriers";
 import { confirmationsText, findingsCsv, type BatchRow } from "@/lib/engine/export";
-import { RULEBOOK } from "@/lib/engine/rules";
 import { SAMPLE_NOTES } from "@/lib/examples";
+import RateRulebook from "./RateRulebook";
 import { STATUS_STAMP, Stamp, download, gbp, type Ctx } from "./ui";
 
 type Filter = "All" | "Blocked" | "Review" | "Ready";
@@ -66,7 +65,7 @@ function Inspector({ row }: { row: BatchRow }) {
         <button className="btn" onClick={() => download(`${row.booking_id}_confirmation.txt`, `${row.report.summary}\n\nWhy this carrier: ${row.report.justification}`)}>Save confirmation</button>
         <button className="btn" onClick={() => download(`${row.booking_id}_preflight.json`, JSON.stringify(row.report, null, 2), "application/json")}>Save JSON</button>
       </div>
-      <details className="plain"><summary>CONFIRMATION SUMMARY (plain language)</summary><pre className="slip-text">{row.report.summary}</pre></details>
+      <details className="plain"><summary>Confirmation summary (plain language)</summary><pre className="slip-text">{row.report.summary}</pre></details>
     </div>
   );
 }
@@ -182,14 +181,9 @@ export default function ManifestWindow({ today, onContext }: { today: string; on
         </>
       )}
 
-      <details className="plain"><summary>WHAT EACH SAMPLE BOOKING TESTS</summary>
+      <details className="plain"><summary>What each sample booking tests</summary>
         <table className="grid"><tbody>{SAMPLE_NOTES.map((n) => <tr key={n.booking}><td className="mono"><b>{n.booking}</b></td><td>{n.tests}</td></tr>)}</tbody></table></details>
-      <details className="plain"><summary>RATE CARD (SHEET 3) AND RULEBOOK (SHEET 4) IN USE</summary>
-        <table className="grid"><thead><tr><th>CARRIER</th><th>SERVICE</th><th>TO</th><th>£/PALLET</th><th>DAYS</th><th>ON-TIME %</th><th>MAX KG/PALLET</th></tr></thead>
-          <tbody>{DEFAULT_RATE_CARD.map((l) => <tr key={l.name + l.destination}><td>{l.name}</td><td>{l.service}</td><td>{l.destination}</td><td className="mono">{l.price_per_pallet.toString()}</td><td className="mono">{l.transit_days}</td><td className="mono">{l.on_time_pct.toString()}</td><td className="mono">{l.max_pallet_kg.toString()}</td></tr>)}</tbody></table>
-        <table className="grid"><thead><tr><th>RULE</th><th>CHECK</th><th>IF BROKEN</th></tr></thead>
-          <tbody>{RULEBOOK.map(([id, text, sev]) => <tr key={id}><td className="mono"><b>{id}</b></td><td>{text}</td><td className="mono">{sev.toUpperCase()}</td></tr>)}</tbody></table>
-      </details>
+      <details className="plain"><summary>Rate card (Sheet 3) and rulebook (Sheet 4) in use</summary><RateRulebook /></details>
     </div>
   );
 }

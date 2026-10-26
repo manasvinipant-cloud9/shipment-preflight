@@ -100,11 +100,11 @@ export default function ChatWindow({ today, offline, llm, onContext }: {
       <div className="log" ref={logRef} aria-live="polite">
         {msgs.map((m, i) => (
           <div key={i} className={`line ${m.role}`}>
-            <span className="who">{m.role === "assistant" ? "OPERATOR>" : "SELLER>"}</span>
+            <span className="who">{m.role === "assistant" ? "Operator" : "Seller"}</span>
             <span className="txt">{m.text}</span>
           </div>
         ))}
-        {busy && <div className="line assistant"><span className="who">OPERATOR&gt;</span><span className="txt"><span className="spin" />checking…</span></div>}
+        {busy && <div className="line assistant"><span className="who">Operator</span><span className="txt"><span className="spin" />checking…</span></div>}
       </div>
       {failed && <div className="notice warn">GEMINI CALL FAILED. Check <code>GEMINI_API_KEY</code> and quota in Vercel, or switch on Offline mode (START ▸ Control Panel).</div>}
 

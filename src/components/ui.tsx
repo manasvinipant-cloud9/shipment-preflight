@@ -47,12 +47,11 @@ export function Win({
   return (
     <section id={`win-${id}`} className={`win win-${id}${maximized ? " max" : ""}${minimized ? " min" : ""}`} aria-label={title}>
       <header className="titlebar">
-        <span className="tb-icon" aria-hidden>▣</span>
-        <span className="tb-title">{title}</span>
+        <h3 className="tb-title">{title}</h3>
         <span className="tb-sub">{sub}</span>
         <span className="tb-btns">
-          <button className="tb-btn" aria-label={`Minimize ${title}`} title={minimized ? "Restore" : "Minimize"} onClick={onMin}>{minimized ? "▴" : "_"}</button>
-          <button className="tb-btn" aria-label={`Maximize ${title}`} title={maximized ? "Restore size" : "Maximize"} onClick={onMax}>{maximized ? "❐" : "□"}</button>
+          <button className="tb-btn" aria-label={`${minimized ? "Restore" : "Minimize"} ${title}`} aria-expanded={!minimized} onClick={onMin}>{minimized ? "＋" : "－"}</button>
+          <button className="tb-btn" aria-label={`${maximized ? "Restore size of" : "Maximize"} ${title}`} aria-pressed={maximized} onClick={onMax}>{maximized ? "⤡" : "⤢"}</button>
         </span>
       </header>
       <div className="win-body" hidden={minimized}>{children}</div>

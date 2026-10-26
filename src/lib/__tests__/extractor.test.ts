@@ -94,13 +94,13 @@ const chain = (...m: string[]) => () => m;
 
 describe("gemini extractor", () => {
   it("sends today, state and the message, with the schema", async () => {
-    const calls: Array<[string, string, boolean]> = [];
+    const calls: Array<[string, string, { schema: boolean; thinking: boolean }]> = [];
     const ex = makeGeminiExtractor(async (m, c, s) => { calls.push([m, c, s]); return ok([{ op: "set", field: "pallets", value: "3" }]); }, chain("t-happy"));
     expect(await ex("3 pallets", snap({ phase: "collecting" }), TODAY)).toEqual([{ op: "set", field: "pallets", value: "3" }]);
     const body = JSON.parse(calls[0][1]);
     expect(body.today).toBe(TODAY);
     expect(body.seller_message).toBe("3 pallets");
-    expect(calls[0][2]).toBe(true);
+    expect(calls[0][2]).toEqual({ schema: true, thinking: true });
     expect(OPS_SCHEMA.required).toEqual(["ops"]);
   });
 
@@ -111,15 +111,15 @@ describe("gemini extractor", () => {
     }
   });
 
-  it("retries without the schema when it is rejected", async () => {
-    const seen: boolean[] = [];
-    const ex = makeGeminiExtractor(async (_m, _c, s) => {
-      seen.push(s);
-      if (s) throw new Error('{"error":{"code":400,"status":"INVALID_ARGUMENT"}}');
+  it("steps down to simpler requests when an option is rejected (400)", async () => {
+    const seen: string[] = [];
+    const ex = makeGeminiExtractor(async (_m, _c, v) => {
+      seen.push(`${v.schema ? "schema" : "plain"}/${v.thinking ? "think" : "nothink"}`);
+      if (v.thinking || v.schema) throw new Error('{"error":{"code":400,"status":"INVALID_ARGUMENT"}}');
       return ok([]);
     }, chain("t-schema"));
     expect(await ex("x", snap(), TODAY)).toEqual([]);
-    expect(seen).toEqual([true, false]);
+    expect(seen).toEqual(["schema/think", "schema/nothink", "plain/nothink"]);
   });
 
   it("falls through the model chain on quota errors, and remembers the failed model", async () => {

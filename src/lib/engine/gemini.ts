@@ -1,7 +1,7 @@
 // Gemini-backed extractor, following the same pattern as the other projects: GEMINI_API_KEY, GEMINI_MODEL and an
 // ordered GEMINI_FALLBACK_MODELS list tried when the primary is out of quota (429), overloaded (503) or retired (404).
 // Server-only: this file must never be imported by client components (it reads the API key).
-import { GoogleGenAI } from "@google/genai";
+import { GoogleGenAI, ThinkingLevel } from "@google/genai";
 import { ExtractorError, type Extractor, type Op, type Snapshot } from "./conversation";
 import { OPS_SCHEMA, SYSTEM_PROMPT, parseModelJson, ruleBasedExtract, sanitizeOps } from "./extractor";
 
@@ -30,44 +30,66 @@ const redact = (s: string) => s.replace(/AIza[0-9A-Za-z_-]{10,}/g, "[key]");
 
 const AUTH_ERROR = /API key not valid|API_KEY_INVALID|"code":\s*40[13]|PERMISSION_DENIED|UNAUTHENTICATED/i;
 
-type Generate = (model: string, contents: string, withSchema: boolean) => Promise<string | undefined>;
+export interface Variant { schema: boolean; thinking: boolean }
+type Generate = (model: string, contents: string, v: Variant) => Promise<string | undefined>;
 
-const realGenerate: Generate = async (model, contents, withSchema) => {
+// Extraction is a text-to-fields job: Gemini 3 models "think" for many seconds by default, which made real calls time out.
+// GEMINI_THINKING_LEVEL = minimal | low (default) | medium | high | off (send no thinking setting).
+const THINKING: Record<string, ThinkingLevel> = {
+  minimal: ThinkingLevel.MINIMAL, low: ThinkingLevel.LOW, medium: ThinkingLevel.MEDIUM, high: ThinkingLevel.HIGH,
+};
+const thinkingConfig = () => {
+  const level = (process.env.GEMINI_THINKING_LEVEL ?? "low").toLowerCase();
+  return level in THINKING ? { thinkingConfig: { thinkingLevel: THINKING[level] } } : {};
+};
+
+const MODEL_TIMEOUT_MS = 12_000;
+const BUDGET_MS = 28_000; // whole request; the function limit is 60 s
+
+const realGenerate: Generate = async (model, contents, v) => {
   const res = await ai().models.generateContent({
     model,
     contents,
     config: {
       systemInstruction: SYSTEM_PROMPT,
       responseMimeType: "application/json",
-      ...(withSchema ? { responseJsonSchema: OPS_SCHEMA } : {}),
+      ...(v.schema ? { responseJsonSchema: OPS_SCHEMA } : {}),
+      ...(v.thinking ? thinkingConfig() : {}),
       temperature: 0,
-      abortSignal: AbortSignal.timeout(10_000),
+      abortSignal: AbortSignal.timeout(MODEL_TIMEOUT_MS),
     },
   });
   return res.text;
 };
+
+// Tried in order for each model; a 400 (an option this model rejects) steps down to the next, simpler variant.
+const VARIANTS: Variant[] = [
+  { schema: true, thinking: true }, { schema: true, thinking: false }, { schema: false, thinking: false },
+];
 
 /** Exposed for tests: the same logic with an injectable generate function. */
 export function makeGeminiExtractor(generate: Generate = realGenerate, models: () => string[] = modelChain): Extractor {
   return async (text: string, snapshot: Snapshot, today: string): Promise<Op[]> => {
     const payload = JSON.stringify({ today, state: snapshot, seller_message: text }, null, 1);
     let lastError = "no model available";
+    const started = Date.now();
     for (const model of models()) {
       if ((cooldown.get(model) ?? 0) > Date.now()) continue;
-      for (const withSchema of [true, false]) {
+      if (Date.now() - started > BUDGET_MS) { lastError = "timed out"; break; }
+      for (const v of VARIANTS) {
         try {
-          const raw = await generate(model, payload, withSchema);
+          const raw = await generate(model, payload, v);
           if (!raw) throw new ExtractorError("Gemini returned no text");
           return sanitizeOps(parseModelJson(raw));
         } catch (e) {
           const msg = e instanceof Error ? e.message : String(e);
-          console.warn(`[gemini] ${model}${withSchema ? "" : " (no schema)"} failed: ${redact(msg).slice(0, 200)}`);
+          console.warn(`[gemini] ${model} (schema=${v.schema}, thinking=${v.thinking}) failed: ${redact(msg).slice(0, 200)}`);
           if (e instanceof ExtractorError) { lastError = msg; break; } // empty/invalid output: next model
           // A rejected key fails every model the same way: stop at once with a message the user can act on.
           if (AUTH_ERROR.test(msg)) throw new ExtractorError("Gemini rejected the API key (check GEMINI_API_KEY in Vercel)");
-          lastError = msg.slice(0, 160);
-          // Schema dialect rejected (400): retry the same model in plain JSON mode before moving on.
-          if (withSchema && (msg.includes('"code":400') || msg.includes("INVALID_ARGUMENT"))) continue;
+          lastError = redact(msg).slice(0, 160);
+          // An option this model doesn't accept (400): retry the same model with a simpler request before moving on.
+          if (msg.includes('"code":400') || msg.includes("INVALID_ARGUMENT")) continue;
           cooldown.set(model, Date.now() + coolFor(msg));
           break;
         }
@@ -111,5 +133,31 @@ export async function probeModels(): Promise<ProbeResult[]> {
     }
   }));
   probeCache = { at: Date.now(), results };
+  return results;
+}
+
+export interface ExtractProbe { model: string; ok: boolean; ms: number; ops?: number; fields?: string[]; error?: string }
+
+let extractCache: { at: number; results: ExtractProbe[] } | null = null;
+const PROBE_MESSAGE = "I need to send 2 pallets of ceramic mugs from Manchester to a warehouse in Frankfurt, ready on 9 November 2026. " +
+  "620 kg in total and 90 cartons. It's 1080 mugs (90 cartons of 12) at £5 each, 0.5 kg each, HS code 691200, made in the UK. " +
+  "Declared value £5,400, appointment already booked. Balanced please.";
+
+/** Runs the REAL extraction prompt on a fixed message with every model (no cooldowns), so latency and quality are measurable. */
+export async function probeExtraction(): Promise<ExtractProbe[]> {
+  if (extractCache && Date.now() - extractCache.at < 120_000) return extractCache.results;
+  const payload = JSON.stringify({ today: "2026-10-26", state: { shipment: {}, items: [], stale: [], phase: "collecting", asking: [] }, seller_message: PROBE_MESSAGE }, null, 1);
+  const results = await Promise.all(modelChain().map(async (model): Promise<ExtractProbe> => {
+    const t0 = Date.now();
+    try {
+      const raw = await realGenerate(model, payload, VARIANTS[0]);
+      const ops = sanitizeOps(parseModelJson(raw ?? ""));
+      const fields = ops.flatMap((o) => (o.op === "set" ? [String(o.field)] : o.op === "upsert_item" ? Object.keys((o.fields as object) ?? {}).map((k) => `item.${k}`) : []));
+      return { model, ok: true, ms: Date.now() - t0, ops: ops.length, fields };
+    } catch (e) {
+      return { model, ok: false, ms: Date.now() - t0, error: redact(e instanceof Error ? e.message : String(e)).slice(0, 160) };
+    }
+  }));
+  extractCache = { at: Date.now(), results };
   return results;
 }

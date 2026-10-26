@@ -1,0 +1,680 @@
+{
+ "today": "2026-10-25",
+ "file_notes": [],
+ "batch": [
+  {
+   "booking_id": "BK-001",
+   "notes": [],
+   "report": {
+    "booking_id": "BK-001",
+    "status": "READY",
+    "red": [],
+    "amber": [],
+    "recommended_carrier": {
+     "carrier": "Carrier A",
+     "service": "Road economy",
+     "cost_gbp": 540.0,
+     "transit_days": 5,
+     "on_time_pct": 92.0,
+     "max_pallet_kg": 500.0,
+     "score": 93.5
+    },
+    "alternatives": [
+     {
+      "carrier": "Carrier B",
+      "service": "Road standard",
+      "cost_gbp": 660.0,
+      "transit_days": 3,
+      "on_time_pct": 95.0,
+      "max_pallet_kg": 750.0,
+      "score": 87.3
+     }
+    ],
+    "justification": "Carrier A (Road economy) is recommended for a 'Cheapest' priority because it has the lowest price: £540.00 for 3 pallet(s), 5 days transit, 92% on time. Carrier B (Road standard) is quicker (3 days) but costs £120.00 more. Carrier C (Road express) (2 days, £1,020.00) was not considered because it costs more than 1.5x the cheapest option. Choose 'Fastest' to include premium services.",
+    "provisional": false,
+    "summary": "Booking BK-001 (Northfield Goods): Manchester, United Kingdom to Frankfurt, Germany (Warehouse), 3 pallet(s), 620 kg, 1 product line(s), declared £5,400.00, ready 05-11-2026. Priority: Cheapest.\nRecommended carrier: Carrier A (Road economy) - £540.00, 5 day(s), 92% on time.\nWhat happens next:\n  Everything checks out. Carrier A collects from Manchester on 05-11-2026 and delivers to Frankfurt in about 5 day(s) (around 10-11-2026), for £540.00."
+   }
+  },
+  {
+   "booking_id": "BK-002",
+   "notes": [],
+   "report": {
+    "booking_id": "BK-002",
+    "status": "READY",
+    "red": [],
+    "amber": [],
+    "recommended_carrier": {
+     "carrier": "Carrier B",
+     "service": "Road standard",
+     "cost_gbp": 420.0,
+     "transit_days": 3,
+     "on_time_pct": 95.0,
+     "max_pallet_kg": 750.0,
+     "score": 92.4
+    },
+    "alternatives": [
+     {
+      "carrier": "Carrier A",
+      "service": "Road economy",
+      "cost_gbp": 340.0,
+      "transit_days": 5,
+      "on_time_pct": 92.0,
+      "max_pallet_kg": 500.0,
+      "score": 87.1
+     }
+    ],
+    "justification": "Carrier B (Road standard) is recommended for a 'Balanced' priority because it gives the best trade-off of cost, speed and reliability: £420.00 for 2 pallet(s), 3 days transit, 95% on time. It costs £80.00 more than the cheapest option (Carrier A (Road economy)) but is 2 days faster and 3 points more reliable. Carrier C (Road express) (2 days, £660.00) was not considered because it costs more than 1.5x the cheapest option. Choose 'Fastest' to include premium services.",
+    "provisional": false,
+    "summary": "Booking BK-002 (Harbour Home Ltd): London, United Kingdom to Paris, France (Business address), 2 pallet(s), 316 kg, 2 product line(s), declared £5,200.00, ready 09-11-2026. Priority: Balanced.\nRecommended carrier: Carrier B (Road standard) - £420.00, 3 day(s), 95% on time.\nWhat happens next:\n  Everything checks out. Carrier B collects from London on 09-11-2026 and delivers to Paris in about 3 day(s) (around 12-11-2026), for £420.00."
+   }
+  },
+  {
+   "booking_id": "BK-003",
+   "notes": [],
+   "report": {
+    "booking_id": "BK-003",
+    "status": "BLOCKED",
+    "red": [
+     {
+      "rule_id": "R-01",
+      "severity": "Red",
+      "title": "HS code too short or invalid",
+      "detail": "TSH-01: HS code '' is not at least 6 digits.",
+      "fix": "Provide the full commodity code (6+ digits, e.g. 6109.10). Customs rejects shorter codes.",
+      "field": "items[TSH-01].hs_code"
+     },
+     {
+      "rule_id": "R-01",
+      "severity": "Red",
+      "title": "HS code too short or invalid",
+      "detail": "SOK-01: HS code '6115' is not at least 6 digits.",
+      "fix": "Provide the full commodity code (6+ digits, e.g. 6109.10). Customs rejects shorter codes.",
+      "field": "items[SOK-01].hs_code"
+     }
+    ],
+    "amber": [],
+    "recommended_carrier": {
+     "carrier": "Carrier A",
+     "service": "Road economy",
+     "cost_gbp": 360.0,
+     "transit_days": 5,
+     "on_time_pct": 92.0,
+     "max_pallet_kg": 500.0,
+     "score": 93.5
+    },
+    "alternatives": [
+     {
+      "carrier": "Carrier B",
+      "service": "Road standard",
+      "cost_gbp": 440.0,
+      "transit_days": 3,
+      "on_time_pct": 95.0,
+      "max_pallet_kg": 750.0,
+      "score": 87.3
+     }
+    ],
+    "justification": "Carrier A (Road economy) is recommended for a 'Cheapest' priority because it has the lowest price: £360.00 for 2 pallet(s), 5 days transit, 92% on time. Carrier B (Road standard) is quicker (3 days) but costs £80.00 more. Carrier C (Road express) (2 days, £680.00) was not considered because it costs more than 1.5x the cheapest option. Choose 'Fastest' to include premium services.",
+    "provisional": true,
+    "summary": "Booking BK-003 (Kestrel Apparel): Leeds, United Kingdom to Hamburg, Germany (Warehouse), 2 pallet(s), 316 kg, 2 product line(s), declared £5,200.00, ready 12-11-2026. Priority: Cheapest.\n2 blocking issue(s) (Red) must be fixed before this can go:\n  - [R-01] HS code too short or invalid: TSH-01: HS code '' is not at least 6 digits. Fix: Provide the full commodity code (6+ digits, e.g. 6109.10). Customs rejects shorter codes.\n  - [R-01] HS code too short or invalid: SOK-01: HS code '6115' is not at least 6 digits. Fix: Provide the full commodity code (6+ digits, e.g. 6109.10). Customs rejects shorter codes.\nProvisional recommendation: Carrier A (Road economy) - £360.00, 5 day(s), 92% on time.\nWhat happens next:\n  Not booked. Correct the Red items and re-submit this booking.\n  Once clear, the plan would be: Carrier A collects from Leeds on 12-11-2026 and delivers to Hamburg in about 5 day(s) (around 17-11-2026), for £360.00."
+   }
+  },
+  {
+   "booking_id": "BK-004",
+   "notes": [],
+   "report": {
+    "booking_id": "BK-004",
+    "status": "BLOCKED",
+    "red": [
+     {
+      "rule_id": "R-02",
+      "severity": "Red",
+      "title": "Declared value does not match line items",
+      "detail": "Declared £6,600.00 vs £5,400.00 from quantity × unit price (off by £1,200.00, 22.2%; limit 1%).",
+      "fix": "Correct the total to £5,400.00 or fix the quantities/unit prices.",
+      "field": "total_declared_value_gbp"
+     }
+    ],
+    "amber": [],
+    "recommended_carrier": {
+     "carrier": "Carrier C",
+     "service": "Road express",
+     "cost_gbp": 640.0,
+     "transit_days": 2,
+     "on_time_pct": 98.0,
+     "max_pallet_kg": 400.0,
+     "score": 95.0
+    },
+    "alternatives": [
+     {
+      "carrier": "Carrier B",
+      "service": "Road standard",
+      "cost_gbp": 400.0,
+      "transit_days": 3,
+      "on_time_pct": 95.0,
+      "max_pallet_kg": 750.0,
+      "score": 74.1
+     },
+     {
+      "carrier": "Carrier A",
+      "service": "Road economy",
+      "cost_gbp": 320.0,
+      "transit_days": 5,
+      "on_time_pct": 92.0,
+      "max_pallet_kg": 500.0,
+      "score": 56.8
+     }
+    ],
+    "justification": "Carrier C (Road express) is recommended for a 'Fastest' priority because it has the shortest transit time: £640.00 for 2 pallet(s), 2 days transit, 98% on time. It costs £320.00 more than the cheapest option (Carrier A (Road economy)) but is 3 days faster and 6 points more reliable.",
+    "provisional": true,
+    "summary": "Booking BK-004 (Birch & Co): Birmingham, United Kingdom to Amsterdam, Netherlands (Warehouse), 2 pallet(s), 634 kg, 1 product line(s), declared £6,600.00, ready 10-11-2026. Priority: Fastest.\n1 blocking issue(s) (Red) must be fixed before this can go:\n  - [R-02] Declared value does not match line items: Declared £6,600.00 vs £5,400.00 from quantity × unit price (off by £1,200.00, 22.2%; limit 1%). Fix: Correct the total to £5,400.00 or fix the quantities/unit prices.\nProvisional recommendation: Carrier C (Road express) - £640.00, 2 day(s), 98% on time.\nWhat happens next:\n  Not booked. Correct the Red items and re-submit this booking.\n  Once clear, the plan would be: Carrier C collects from Birmingham on 10-11-2026 and delivers to Amsterdam in about 2 day(s) (around 12-11-2026), for £640.00."
+   }
+  },
+  {
+   "booking_id": "BK-005",
+   "notes": [],
+   "report": {
+    "booking_id": "BK-005",
+    "status": "BLOCKED",
+    "red": [
+     {
+      "rule_id": "R-03",
+      "severity": "Red",
+      "title": "Units per carton × cartons ≠ quantity",
+      "detail": "TSH-01: 20 × 20 = 400, but quantity is 500.",
+      "fix": "Correct the quantity, units per carton or carton count so they agree.",
+      "field": "items[TSH-01].quantity"
+     },
+     {
+      "rule_id": "R-04",
+      "severity": "Red",
+      "title": "Total cartons does not match items",
+      "detail": "Shipment says 55 cartons; items add up to 40.",
+      "fix": "Set total cartons to 40, or correct the per-item carton counts.",
+      "field": "total_cartons"
+     }
+    ],
+    "amber": [],
+    "recommended_carrier": {
+     "carrier": "Carrier B",
+     "service": "Road standard",
+     "cost_gbp": 420.0,
+     "transit_days": 3,
+     "on_time_pct": 95.0,
+     "max_pallet_kg": 750.0,
+     "score": 92.4
+    },
+    "alternatives": [
+     {
+      "carrier": "Carrier A",
+      "service": "Road economy",
+      "cost_gbp": 340.0,
+      "transit_days": 5,
+      "on_time_pct": 92.0,
+      "max_pallet_kg": 500.0,
+      "score": 87.1
+     }
+    ],
+    "justification": "Carrier B (Road standard) is recommended for a 'Balanced' priority because it gives the best trade-off of cost, speed and reliability: £420.00 for 2 pallet(s), 3 days transit, 95% on time. It costs £80.00 more than the cheapest option (Carrier A (Road economy)) but is 2 days faster and 3 points more reliable. Carrier C (Road express) (2 days, £660.00) was not considered because it costs more than 1.5x the cheapest option. Choose 'Fastest' to include premium services.",
+    "provisional": true,
+    "summary": "Booking BK-005 (Pennine Textiles): Leeds, United Kingdom to Lyon, France (Business address), 2 pallet(s), 289 kg, 2 product line(s), declared £4,800.00, ready 11-11-2026. Priority: Balanced.\n2 blocking issue(s) (Red) must be fixed before this can go:\n  - [R-03] Units per carton × cartons ≠ quantity: TSH-01: 20 × 20 = 400, but quantity is 500. Fix: Correct the quantity, units per carton or carton count so they agree.\n  - [R-04] Total cartons does not match items: Shipment says 55 cartons; items add up to 40. Fix: Set total cartons to 40, or correct the per-item carton counts.\nProvisional recommendation: Carrier B (Road standard) - £420.00, 3 day(s), 95% on time.\nWhat happens next:\n  Not booked. Correct the Red items and re-submit this booking.\n  Once clear, the plan would be: Carrier B collects from Leeds on 11-11-2026 and delivers to Lyon in about 3 day(s) (around 14-11-2026), for £420.00."
+   }
+  },
+  {
+   "booking_id": "BK-006",
+   "notes": [],
+   "report": {
+    "booking_id": "BK-006",
+    "status": "BLOCKED",
+    "red": [
+     {
+      "rule_id": "R-05",
+      "severity": "Red",
+      "title": "Pallet too heavy",
+      "detail": "1300 kg over 2 pallet(s) = 650 kg/pallet; Carrier A (Road economy) allows 500 kg.",
+      "fix": "Either split the load over at least 3 pallets so each is under 500 kg, or switch to Carrier B (Road standard), which accepts 750 kg per pallet (£440.00, 3 days).",
+      "field": "pallets"
+     }
+    ],
+    "amber": [],
+    "recommended_carrier": {
+     "carrier": "Carrier B",
+     "service": "Road standard",
+     "cost_gbp": 440.0,
+     "transit_days": 3,
+     "on_time_pct": 95.0,
+     "max_pallet_kg": 750.0,
+     "score": 100.0
+    },
+    "alternatives": [],
+    "justification": "Carrier B (Road standard) is recommended for a 'Cheapest' priority because it has the lowest price: £440.00 for 2 pallet(s), 3 days transit, 95% on time. Carrier A (Road economy) is excluded: 650 kg per pallet is over its 500 kg limit. Carrier C (Road express) is excluded: 650 kg per pallet is over its 400 kg limit.",
+    "provisional": true,
+    "summary": "Booking BK-006 (Ironbridge Hardware): Birmingham, United Kingdom to Berlin, Germany (Warehouse), 2 pallet(s), 1300 kg, 1 product line(s), declared £8,000.00, ready 13-11-2026. Priority: Cheapest.\n1 blocking issue(s) (Red) must be fixed before this can go:\n  - [R-05] Pallet too heavy: 1300 kg over 2 pallet(s) = 650 kg/pallet; Carrier A (Road economy) allows 500 kg. Fix: Either split the load over at least 3 pallets so each is under 500 kg, or switch to Carrier B (Road standard), which accepts 750 kg per pallet (£440.00, 3 days).\nProvisional recommendation: Carrier B (Road standard) - £440.00, 3 day(s), 95% on time.\nWhat happens next:\n  Not booked. Correct the Red items and re-submit this booking.\n  Once clear, the plan would be: Carrier B collects from Birmingham on 13-11-2026 and delivers to Berlin in about 3 day(s) (around 16-11-2026), for £440.00."
+   }
+  },
+  {
+   "booking_id": "BK-007",
+   "notes": [],
+   "report": {
+    "booking_id": "BK-007",
+    "status": "BLOCKED",
+    "red": [
+     {
+      "rule_id": "R-06",
+      "severity": "Red",
+      "title": "Possible dangerous goods: lithium battery",
+      "detail": "PWR-01: description 'Li-ion portable power bank 10000mAh' matches lithium battery keywords.",
+      "fix": "Standard freight cannot carry this. Remove the item, or book a certified ADR/DG service with a UN number and safety data sheet.",
+      "field": "items[PWR-01].description"
+     },
+     {
+      "rule_id": "R-06",
+      "severity": "Red",
+      "title": "Possible dangerous goods: aerosol",
+      "detail": "DEO-01: description 'Aerosol deodorant spray 150ml' matches aerosol keywords.",
+      "fix": "Standard freight cannot carry this. Remove the item, or book a certified ADR/DG service with a UN number and safety data sheet.",
+      "field": "items[DEO-01].description"
+     }
+    ],
+    "amber": [],
+    "recommended_carrier": {
+     "carrier": "Carrier B",
+     "service": "Road standard",
+     "cost_gbp": 210.0,
+     "transit_days": 3,
+     "on_time_pct": 95.0,
+     "max_pallet_kg": 750.0,
+     "score": 92.4
+    },
+    "alternatives": [
+     {
+      "carrier": "Carrier A",
+      "service": "Road economy",
+      "cost_gbp": 170.0,
+      "transit_days": 5,
+      "on_time_pct": 92.0,
+      "max_pallet_kg": 500.0,
+      "score": 87.1
+     }
+    ],
+    "justification": "Carrier B (Road standard) is recommended for a 'Balanced' priority because it gives the best trade-off of cost, speed and reliability: £210.00 for 1 pallet(s), 3 days transit, 95% on time. It costs £40.00 more than the cheapest option (Carrier A (Road economy)) but is 2 days faster and 3 points more reliable. Carrier C (Road express) (2 days, £330.00) was not considered because it costs more than 1.5x the cheapest option. Choose 'Fastest' to include premium services.",
+    "provisional": true,
+    "summary": "Booking BK-007 (Volt & Spark): London, United Kingdom to Lyon, France (Business address), 1 pallet(s), 158 kg, 2 product line(s), declared £3,300.00, ready 16-11-2026. Priority: Balanced.\n2 blocking issue(s) (Red) must be fixed before this can go:\n  - [R-06] Possible dangerous goods: lithium battery: PWR-01: description 'Li-ion portable power bank 10000mAh' matches lithium battery keywords. Fix: Standard freight cannot carry this. Remove the item, or book a certified ADR/DG service with a UN number and safety data sheet.\n  - [R-06] Possible dangerous goods: aerosol: DEO-01: description 'Aerosol deodorant spray 150ml' matches aerosol keywords. Fix: Standard freight cannot carry this. Remove the item, or book a certified ADR/DG service with a UN number and safety data sheet.\nProvisional recommendation: Carrier B (Road standard) - £210.00, 3 day(s), 95% on time.\nWhat happens next:\n  Not booked. Correct the Red items and re-submit this booking.\n  Once clear, the plan would be: Carrier B collects from London on 16-11-2026 and delivers to Lyon in about 3 day(s) (around 19-11-2026), for £210.00."
+   }
+  },
+  {
+   "booking_id": "BK-008",
+   "notes": [],
+   "report": {
+    "booking_id": "BK-008",
+    "status": "REVIEW",
+    "red": [],
+    "amber": [
+     {
+      "rule_id": "R-07",
+      "severity": "Amber",
+      "title": "Gross weight lower than goods weight",
+      "detail": "Gross 100 kg is less than goods alone (140.0 kg). Gross must include packaging and pallets.",
+      "fix": "Re-weigh; gross should be at least 140.0 kg (typically goods + ~5-10% packaging + pallet).",
+      "field": "total_gross_weight_kg"
+     }
+    ],
+    "recommended_carrier": {
+     "carrier": "Carrier C",
+     "service": "Road express",
+     "cost_gbp": 320.0,
+     "transit_days": 2,
+     "on_time_pct": 98.0,
+     "max_pallet_kg": 400.0,
+     "score": 95.0
+    },
+    "alternatives": [
+     {
+      "carrier": "Carrier B",
+      "service": "Road standard",
+      "cost_gbp": 200.0,
+      "transit_days": 3,
+      "on_time_pct": 95.0,
+      "max_pallet_kg": 750.0,
+      "score": 90.7
+     },
+     {
+      "carrier": "Carrier A",
+      "service": "Road economy",
+      "cost_gbp": 160.0,
+      "transit_days": 5,
+      "on_time_pct": 92.0,
+      "max_pallet_kg": 500.0,
+      "score": 86.4
+     }
+    ],
+    "justification": "Carrier C (Road express) is recommended for a 'Most reliable' priority because it has the highest on-time rate: £320.00 for 1 pallet(s), 2 days transit, 98% on time. It costs £160.00 more than the cheapest option (Carrier A (Road economy)) but is 3 days faster and 6 points more reliable.",
+    "provisional": false,
+    "summary": "Booking BK-008 (Calder Crafts): Manchester, United Kingdom to Rotterdam, Netherlands (Business address), 1 pallet(s), 100 kg, 1 product line(s), declared £2,400.00, ready 17-11-2026. Priority: Most reliable.\nWarnings (Amber) to fix or check:\n  - [R-07] Gross weight lower than goods weight: Gross 100 kg is less than goods alone (140.0 kg). Gross must include packaging and pallets. Fix: Re-weigh; gross should be at least 140.0 kg (typically goods + ~5-10% packaging + pallet).\nRecommended carrier: Carrier C (Road express) - £320.00, 2 day(s), 98% on time.\nWhat happens next:\n  Safe to proceed, but fix or check the warnings first. Carrier C collects from Manchester on 17-11-2026 and delivers to Rotterdam in about 2 day(s) (around 19-11-2026), for £320.00."
+   }
+  },
+  {
+   "booking_id": "BK-009",
+   "notes": [],
+   "report": {
+    "booking_id": "BK-009",
+    "status": "REVIEW",
+    "red": [],
+    "amber": [
+     {
+      "rule_id": "R-08",
+      "severity": "Amber",
+      "title": "No delivery appointment for warehouse",
+      "detail": "Destination is a warehouse and no delivery appointment is confirmed.",
+      "fix": "Book a slot with the consignee and give us the reference; otherwise delivery may be refused.",
+      "field": "delivery_appointment_booked"
+     },
+     {
+      "rule_id": "R-09",
+      "severity": "Amber",
+      "title": "Country of origin missing",
+      "detail": "BSC-01 has no country of origin.",
+      "fix": "Add the country of origin (where goods were made); needed for customs and duty.",
+      "field": "items[BSC-01].country_of_origin"
+     },
+     {
+      "rule_id": "R-10",
+      "severity": "Amber",
+      "title": "Ready-to-ship date is in the past",
+      "detail": "Ready date 2026-10-01 is before today (2026-10-25).",
+      "fix": "Pick today or a future date when the goods will really be ready for collection.",
+      "field": "ready_date"
+     }
+    ],
+    "recommended_carrier": {
+     "carrier": "Carrier C",
+     "service": "Road express",
+     "cost_gbp": 960.0,
+     "transit_days": 2,
+     "on_time_pct": 98.0,
+     "max_pallet_kg": 400.0,
+     "score": 95.0
+    },
+    "alternatives": [
+     {
+      "carrier": "Carrier B",
+      "service": "Road standard",
+      "cost_gbp": 600.0,
+      "transit_days": 3,
+      "on_time_pct": 95.0,
+      "max_pallet_kg": 750.0,
+      "score": 74.1
+     },
+     {
+      "carrier": "Carrier A",
+      "service": "Road economy",
+      "cost_gbp": 480.0,
+      "transit_days": 5,
+      "on_time_pct": 92.0,
+      "max_pallet_kg": 500.0,
+      "score": 56.8
+     }
+    ],
+    "justification": "Carrier C (Road express) is recommended for a 'Fastest' priority because it has the shortest transit time: £960.00 for 3 pallet(s), 2 days transit, 98% on time. It costs £480.00 more than the cheapest option (Carrier A (Road economy)) but is 3 days faster and 6 points more reliable.",
+    "provisional": false,
+    "summary": "Booking BK-009 (Fenwick Foods): London, United Kingdom to Amsterdam, Netherlands (Warehouse), 3 pallet(s), 950 kg, 2 product line(s), declared £6,000.00, ready 01-10-2026. Priority: Fastest.\nWarnings (Amber) to fix or check:\n  - [R-08] No delivery appointment for warehouse: Destination is a warehouse and no delivery appointment is confirmed. Fix: Book a slot with the consignee and give us the reference; otherwise delivery may be refused.\n  - [R-09] Country of origin missing: BSC-01 has no country of origin. Fix: Add the country of origin (where goods were made); needed for customs and duty.\n  - [R-10] Ready-to-ship date is in the past: Ready date 2026-10-01 is before today (2026-10-25). Fix: Pick today or a future date when the goods will really be ready for collection.\nRecommended carrier: Carrier C (Road express) - £960.00, 2 day(s), 98% on time.\nWhat happens next:\n  Safe to proceed, but fix or check the warnings first. Carrier C collects from London on 01-10-2026 and delivers to Amsterdam in about 2 day(s) (around 03-10-2026), for £960.00."
+   }
+  },
+  {
+   "booking_id": "BK-010",
+   "notes": [],
+   "report": {
+    "booking_id": "BK-010",
+    "status": "BLOCKED",
+    "red": [
+     {
+      "rule_id": "R-01",
+      "severity": "Red",
+      "title": "HS code too short or invalid",
+      "detail": "THN-01: HS code '3814' is not at least 6 digits.",
+      "fix": "Provide the full commodity code (6+ digits, e.g. 6109.10). Customs rejects shorter codes.",
+      "field": "items[THN-01].hs_code"
+     },
+     {
+      "rule_id": "R-01",
+      "severity": "Red",
+      "title": "HS code too short or invalid",
+      "detail": "GLU-01: HS code '' is not at least 6 digits.",
+      "fix": "Provide the full commodity code (6+ digits, e.g. 6109.10). Customs rejects shorter codes.",
+      "field": "items[GLU-01].hs_code"
+     },
+     {
+      "rule_id": "R-02",
+      "severity": "Red",
+      "title": "Declared value does not match line items",
+      "detail": "Declared £8,000.00 vs £6,200.00 from quantity × unit price (off by £1,800.00, 29.0%; limit 1%).",
+      "fix": "Correct the total to £6,200.00 or fix the quantities/unit prices.",
+      "field": "total_declared_value_gbp"
+     },
+     {
+      "rule_id": "R-04",
+      "severity": "Red",
+      "title": "Total cartons does not match items",
+      "detail": "Shipment says 95 cartons; items add up to 90.",
+      "fix": "Set total cartons to 90, or correct the per-item carton counts.",
+      "field": "total_cartons"
+     },
+     {
+      "rule_id": "R-05",
+      "severity": "Red",
+      "title": "Pallet too heavy",
+      "detail": "2400 kg over 3 pallet(s) = 800 kg/pallet; Carrier A (Road economy) allows 500 kg.",
+      "fix": "No service on this route takes 800 kg per pallet (the maximum is 750 kg). Split the load over at least 4 pallets, or re-weigh if the figure is wrong.",
+      "field": "pallets"
+     },
+     {
+      "rule_id": "R-06",
+      "severity": "Red",
+      "title": "Possible dangerous goods: flammable liquid",
+      "detail": "THN-01: description 'Flammable paint thinner 1L' matches flammable liquid keywords.",
+      "fix": "Standard freight cannot carry this. Remove the item, or book a certified ADR/DG service with a UN number and safety data sheet.",
+      "field": "items[THN-01].description"
+     }
+    ],
+    "amber": [
+     {
+      "rule_id": "R-08",
+      "severity": "Amber",
+      "title": "No delivery appointment for warehouse",
+      "detail": "Destination is a warehouse and no delivery appointment is confirmed.",
+      "fix": "Book a slot with the consignee and give us the reference; otherwise delivery may be refused.",
+      "field": "delivery_appointment_booked"
+     },
+     {
+      "rule_id": "R-09",
+      "severity": "Amber",
+      "title": "Country of origin missing",
+      "detail": "GLU-01 has no country of origin.",
+      "fix": "Add the country of origin (where goods were made); needed for customs and duty.",
+      "field": "items[GLU-01].country_of_origin"
+     }
+    ],
+    "recommended_carrier": null,
+    "alternatives": [],
+    "justification": "No carrier on this route can take this load as declared, so no recommendation can be made yet.",
+    "provisional": true,
+    "summary": "Booking BK-010 (Magpie Trading): Birmingham, United Kingdom to Hamburg, Germany (Warehouse), 3 pallet(s), 2400 kg, 2 product line(s), declared £8,000.00, ready 18-11-2026. Priority: Cheapest.\n6 blocking issue(s) (Red) must be fixed before this can go:\n  - [R-01] HS code too short or invalid: THN-01: HS code '3814' is not at least 6 digits. Fix: Provide the full commodity code (6+ digits, e.g. 6109.10). Customs rejects shorter codes.\n  - [R-01] HS code too short or invalid: GLU-01: HS code '' is not at least 6 digits. Fix: Provide the full commodity code (6+ digits, e.g. 6109.10). Customs rejects shorter codes.\n  - [R-02] Declared value does not match line items: Declared £8,000.00 vs £6,200.00 from quantity × unit price (off by £1,800.00, 29.0%; limit 1%). Fix: Correct the total to £6,200.00 or fix the quantities/unit prices.\n  - [R-04] Total cartons does not match items: Shipment says 95 cartons; items add up to 90. Fix: Set total cartons to 90, or correct the per-item carton counts.\n  - [R-05] Pallet too heavy: 2400 kg over 3 pallet(s) = 800 kg/pallet; Carrier A (Road economy) allows 500 kg. Fix: No service on this route takes 800 kg per pallet (the maximum is 750 kg). Split the load over at least 4 pallets, or re-weigh if the figure is wrong.\n  - [R-06] Possible dangerous goods: flammable liquid: THN-01: description 'Flammable paint thinner 1L' matches flammable liquid keywords. Fix: Standard freight cannot carry this. Remove the item, or book a certified ADR/DG service with a UN number and safety data sheet.\nWarnings (Amber) to fix or check:\n  - [R-08] No delivery appointment for warehouse: Destination is a warehouse and no delivery appointment is confirmed. Fix: Book a slot with the consignee and give us the reference; otherwise delivery may be refused.\n  - [R-09] Country of origin missing: GLU-01 has no country of origin. Fix: Add the country of origin (where goods were made); needed for customs and duty.\nWhat happens next:\n  Not booked. Correct the Red items and re-submit this booking."
+   }
+  }
+ ],
+ "conversations": {
+  "demo_flow": [
+   {
+    "input": "seller: Northfield Goods\norigin city: Manchester\ndestination city: Frankfurt\ncountry: Germany\ntype: Warehouse\nappointment: No\nready date: 01-12-2026\npallets: 2\ntotal cartons: 30\ngross weight: 520\ndeclared value: 6000\npriority: Balanced\nitem A: desc=Cotton t-shirts, hs=610910, qty=1000, price=3, upc=50, cartons=20, weight=0.2, origin=India\nitem B: desc=Ceramic mugs, hs=691200, qty=500, price=6, upc=50, cartons=10, weight=0.4, origin=China\n",
+    "reply": "Shipment (Northfield Goods): Manchester to Frankfurt, Germany (Warehouse), 2 pallet(s), 520 kg, 2 product line(s), declared £6,000.00, ready 01-12-2026. Priority: Balanced.\nWarnings (Amber) to fix or check:\n  - [R-08] No delivery appointment for warehouse: Destination is a warehouse and no delivery appointment is confirmed. Fix: Book a slot with the consignee and give us the reference; otherwise delivery may be refused.\nRecommended carrier: Carrier B (Road standard) - £440.00, 3 day(s), 95% on time.\nWhat happens next:\n  You can confirm as-is, or correct the warnings first and I'll re-check. Carrier B collects from Manchester on 01-12-2026 and delivers to Frankfurt in about 3 day(s) (around 04-12-2026), for £440.00.",
+    "phase": "confirming",
+    "status": "REVIEW",
+    "pallets": 2,
+    "stale": [],
+    "missing": []
+   },
+   {
+    "input": "add a pallet",
+    "reply": "Since that changed, is the total gross weight (520 kg) still right? Give the new figure or say it's unchanged.",
+    "phase": "collecting",
+    "status": "REVIEW",
+    "pallets": 3,
+    "stale": [
+     "total_gross_weight_kg"
+    ],
+    "missing": []
+   },
+   {
+    "input": "unchanged",
+    "reply": "Shipment (Northfield Goods): Manchester to Frankfurt, Germany (Warehouse), 3 pallet(s), 520 kg, 2 product line(s), declared £6,000.00, ready 01-12-2026. Priority: Balanced.\nWarnings (Amber) to fix or check:\n  - [R-08] No delivery appointment for warehouse: Destination is a warehouse and no delivery appointment is confirmed. Fix: Book a slot with the consignee and give us the reference; otherwise delivery may be refused.\nRecommended carrier: Carrier B (Road standard) - £660.00, 3 day(s), 95% on time.\nWhat happens next:\n  You can confirm as-is, or correct the warnings first and I'll re-check. Carrier B collects from Manchester on 01-12-2026 and delivers to Frankfurt in about 3 day(s) (around 04-12-2026), for £660.00.",
+    "phase": "confirming",
+    "status": "REVIEW",
+    "pallets": 3,
+    "stale": [],
+    "missing": []
+   },
+   {
+    "input": "appointment: yes",
+    "reply": "Shipment (Northfield Goods): Manchester to Frankfurt, Germany (Warehouse), 3 pallet(s), 520 kg, 2 product line(s), declared £6,000.00, ready 01-12-2026. Priority: Balanced.\nRecommended carrier: Carrier B (Road standard) - £660.00, 3 day(s), 95% on time.\nWhat happens next:\n  Everything checks out. Reply 'confirm' to book. Carrier B collects from Manchester on 01-12-2026 and delivers to Frankfurt in about 3 day(s) (around 04-12-2026), for £660.00.",
+    "phase": "confirming",
+    "status": "READY",
+    "pallets": 3,
+    "stale": [],
+    "missing": []
+   },
+   {
+    "input": "confirm",
+    "reply": "Booked with Carrier B (Road standard). Carrier B collects from Manchester on 01-12-2026 and delivers to Frankfurt in about 3 day(s) (around 04-12-2026), for £660.00.",
+    "phase": "booked",
+    "status": "READY",
+    "pallets": 3,
+    "stale": [],
+    "missing": []
+   }
+  ],
+  "mistakes": [
+   {
+    "input": "seller: Volt & Spark\norigin city: London\ndestination city: Lyon\ncountry: France\ntype: Business address\nready date: 01-10-2026\npallets: 1\ntotal cartons: 12\ngross weight: 700\ndeclared value: 5000\npriority: Cheapest\nitem A: desc=Li-ion portable power bank, hs=8507, qty=300, price=9, upc=30, cartons=10, weight=0.25, origin=China\nitem B: desc=Aerosol deodorant spray 150ml, hs=330720, qty=240, price=2.5, upc=24, cartons=10, weight=0.2, origin=United Kingdom\n",
+    "reply": "Shipment (Volt & Spark): London to Lyon, France (Business address), 1 pallet(s), 700 kg, 2 product line(s), declared £5,000.00, ready 01-10-2026. Priority: Cheapest.\n6 blocking issue(s) (Red) must be fixed before this can go:\n  - [R-01] HS code too short or invalid: A: HS code '8507' is not at least 6 digits. Fix: Provide the full commodity code (6+ digits, e.g. 6109.10). Customs rejects shorter codes.\n  - [R-02] Declared value does not match line items: Declared £5,000.00 vs £3,300.00 from quantity × unit price (off by £1,700.00, 51.5%; limit 1%). Fix: Correct the total to £3,300.00 or fix the quantities/unit prices.\n  - [R-04] Total cartons does not match items: Shipment says 12 cartons; items add up to 20. Fix: Set total cartons to 20, or correct the per-item carton counts.\n  - [R-05] Pallet too heavy: 700 kg over 1 pallet(s) = 700 kg/pallet; Carrier A (Road economy) allows 500 kg. Fix: Either split the load over at least 2 pallets so each is under 500 kg, or switch to Carrier B (Road standard), which accepts 750 kg per pallet (£210.00, 3 days).\n  - [R-06] Possible dangerous goods: lithium battery: A: description 'Li-ion portable power bank' matches lithium battery keywords. Fix: Standard freight cannot carry this. Remove the item, or book a certified ADR/DG service with a UN number and safety data sheet.\n  - [R-06] Possible dangerous goods: aerosol: B: description 'Aerosol deodorant spray 150ml' matches aerosol keywords. Fix: Standard freight cannot carry this. Remove the item, or book a certified ADR/DG service with a UN number and safety data sheet.\nWarnings (Amber) to fix or check:\n  - [R-10] Ready-to-ship date is in the past: Ready date 2026-10-01 is before today (2026-10-25). Fix: Pick today or a future date when the goods will really be ready for collection.\nProvisional recommendation: Carrier B (Road standard) - £210.00, 3 day(s), 95% on time.\nWhat happens next:\n  Not booked. Send the corrections and the checks re-run instantly.\n  Once clear, the plan would be: Carrier B collects from London on 01-10-2026 and delivers to Lyon in about 3 day(s) (around 04-10-2026), for £210.00.",
+    "phase": "confirming",
+    "status": "BLOCKED",
+    "pallets": 1,
+    "stale": [],
+    "missing": []
+   }
+  ],
+  "step_by_step": [
+   {
+    "input": "country: France",
+    "reply": "Is the destination a Warehouse or a Business address?\nWhen will the goods be ready for collection (date)?\nHow many pallets?",
+    "phase": "collecting",
+    "status": null,
+    "pallets": null,
+    "stale": [],
+    "missing": [
+     "Is the destination a Warehouse or a Business address?",
+     "When will the goods be ready for collection (date)?",
+     "How many pallets?"
+    ]
+   },
+   {
+    "input": "Business",
+    "reply": "When will the goods be ready for collection (date)?\nHow many pallets?\nWhat's the total gross weight in kg (including packaging and pallets)?",
+    "phase": "collecting",
+    "status": null,
+    "pallets": null,
+    "stale": [],
+    "missing": [
+     "When will the goods be ready for collection (date)?",
+     "How many pallets?",
+     "What's the total gross weight in kg (including packaging and pallets)?"
+    ]
+   },
+   {
+    "input": "2026-11-02",
+    "reply": "How many pallets?\nWhat's the total gross weight in kg (including packaging and pallets)?\nHow many cartons in total?",
+    "phase": "collecting",
+    "status": null,
+    "pallets": null,
+    "stale": [],
+    "missing": [
+     "How many pallets?",
+     "What's the total gross weight in kg (including packaging and pallets)?",
+     "How many cartons in total?"
+    ]
+   },
+   {
+    "input": "4",
+    "reply": "What's the total gross weight in kg (including packaging and pallets)?\nHow many cartons in total?\nWhat's the total declared value in GBP?",
+    "phase": "collecting",
+    "status": null,
+    "pallets": 4,
+    "stale": [],
+    "missing": [
+     "What's the total gross weight in kg (including packaging and pallets)?",
+     "How many cartons in total?",
+     "What's the total declared value in GBP?"
+    ]
+   },
+   {
+    "input": "gross weight: 800",
+    "reply": "How many cartons in total?\nWhat's the total declared value in GBP?\nWhat matters most: Cheapest, Fastest, Most reliable, or Balanced?",
+    "phase": "collecting",
+    "status": null,
+    "pallets": 4,
+    "stale": [],
+    "missing": [
+     "How many cartons in total?",
+     "What's the total declared value in GBP?",
+     "What matters most: Cheapest, Fastest, Most reliable, or Balanced?"
+    ]
+   }
+  ],
+  "declines": [
+   {
+    "input": "country: Germany\ntype: Warehouse\nready date: 05-11-2026\npallets: 2\ntotal cartons: 10\ngross weight: 300\ndeclared value: 500\npriority: Fastest\nitem A: desc=Mugs, qty=100, price=5, upc=10, cartons=10, weight=1",
+    "reply": "Heads-up [Amber] No delivery appointment for warehouse: Destination is a warehouse and no delivery appointment is confirmed.\nIs a delivery appointment booked with the warehouse (Yes/No)?\nWhat's the HS (customs) code for 'Mugs'? (6+ digits; say 'unknown' to skip - it will be flagged as a blocking issue)\nWhat's the country of origin for 'Mugs'? (say 'unknown' to skip)",
+    "phase": "collecting",
+    "status": null,
+    "pallets": 2,
+    "stale": [],
+    "missing": [
+     "Is a delivery appointment booked with the warehouse (Yes/No)?",
+     "What's the HS (customs) code for 'Mugs'? (6+ digits; say 'unknown' to skip - it will be flagged as a blocking issue)",
+     "What's the country of origin for 'Mugs'? (say 'unknown' to skip)"
+    ]
+   },
+   {
+    "input": "unknown",
+    "reply": "What's the HS (customs) code for 'Mugs'? (6+ digits; say 'unknown' to skip - it will be flagged as a blocking issue)\nWhat's the country of origin for 'Mugs'? (say 'unknown' to skip)",
+    "phase": "collecting",
+    "status": null,
+    "pallets": 2,
+    "stale": [],
+    "missing": [
+     "What's the HS (customs) code for 'Mugs'? (6+ digits; say 'unknown' to skip - it will be flagged as a blocking issue)",
+     "What's the country of origin for 'Mugs'? (say 'unknown' to skip)"
+    ]
+   },
+   {
+    "input": "unknown",
+    "reply": "What's the country of origin for 'Mugs'? (say 'unknown' to skip)",
+    "phase": "collecting",
+    "status": null,
+    "pallets": 2,
+    "stale": [],
+    "missing": [
+     "What's the country of origin for 'Mugs'? (say 'unknown' to skip)"
+    ]
+   },
+   {
+    "input": "skip",
+    "reply": "Shipment: Germany (Warehouse), 2 pallet(s), 300 kg, 1 product line(s), declared £500.00, ready 05-11-2026. Priority: Fastest.\n1 blocking issue(s) (Red) must be fixed before this can go:\n  - [R-01] HS code too short or invalid: A: HS code '' is not at least 6 digits. Fix: Provide the full commodity code (6+ digits, e.g. 6109.10). Customs rejects shorter codes.\nWarnings (Amber) to fix or check:\n  - [R-08] No delivery appointment for warehouse: Destination is a warehouse and no delivery appointment is confirmed. Fix: Book a slot with the consignee and give us the reference; otherwise delivery may be refused.\n  - [R-09] Country of origin missing: A has no country of origin. Fix: Add the country of origin (where goods were made); needed for customs and duty.\nProvisional recommendation: Carrier C (Road express) - £680.00, 2 day(s), 98% on time.\nWhat happens next:\n  Not booked. Send the corrections and the checks re-run instantly.\n  Once clear, the plan would be: Carrier C collects from the origin on 05-11-2026 and delivers to Germany in about 2 day(s) (around 07-11-2026), for £680.00.",
+    "phase": "confirming",
+    "status": "BLOCKED",
+    "pallets": 2,
+    "stale": [],
+    "missing": []
+   }
+  ]
+ }
+}

@@ -1,4 +1,11 @@
-.venv/
-__pycache__/
-.streamlit/secrets.toml
-*.pyc
+node_modules
+.next
+.env
+.env.*
+!.env.example
+.vercel
+*.tsbuildinfo
+next-env.d.ts
+.venv
+__pycache__
+.DS_Store

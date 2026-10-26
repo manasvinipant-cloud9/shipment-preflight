@@ -1,6 +1,8 @@
 "use client";
+import type { ConversationState } from "@/lib/engine/conversation";
 import type { Finding, Shipment } from "@/lib/engine/models";
 import type { PreflightReport } from "@/lib/engine/report";
+import type { BookingView } from "@/lib/engine/view";
 
 /** What the Ledger and Rate Matrix windows are currently looking at: the chat session or a selected uploaded booking. */
 export interface Ctx {
@@ -11,6 +13,15 @@ export interface Ctx {
   findings: Finding[];
   complete: boolean; // a full pre-flight ran (rules without findings PASS)
   report: PreflightReport | null;
+}
+
+/** The Ctx for a chat session: its pre-flight report once complete, otherwise the live draft findings. */
+export function toCtx(state: ConversationState, view: BookingView): Ctx {
+  const r = state.phase === "collecting" ? null : state.last_report;
+  return {
+    source: "chat", label: "Telegraph session", shipment: state.shipment, priority: state.shipment.priority,
+    findings: r ? [...r.red, ...r.amber] : view.live, complete: !!r, report: r,
+  };
 }
 
 export type StampKind = "red" | "amber" | "green" | "grey";

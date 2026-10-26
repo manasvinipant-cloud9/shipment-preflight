@@ -1,9 +1,15 @@
 "use client";
 import { createContext, useCallback, useContext, useEffect, useMemo, useReducer, useRef, useState, type MutableRefObject, type ReactNode } from "react";
-import type { Ctx } from "./ui";
+import type { ConversationState } from "@/lib/engine/conversation";
+import type { BookingView } from "@/lib/engine/view";
+import { toCtx, type Ctx } from "./ui";
 
 export type LaunchKind = "clean" | "mistakes" | "change";
 export interface ServerStatus { llm: boolean; label: string }
+
+const STORAGE_KEY = "preflight.session.v1";
+/** The chat pieces worth keeping across a refresh. Uploaded batches are big and re-uploadable, so they are not saved. */
+const PERSISTED = ["chat.msgs", "chat.state", "chat.view"] as const;
 
 const pad = (n: number) => String(n).padStart(2, "0");
 const localToday = () => { const d = new Date(); return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`; };
@@ -33,11 +39,39 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   const store = useRef<Record<string, unknown>>({});
   const launchRef = useRef<LaunchKind | null>(null);
   const [version, bump] = useReducer((n: number) => n + 1, 0);
+  const hydrated = useRef(false);
 
   useEffect(() => {
     setToday(localToday());
     fetch("/api/status").then((r) => r.json()).then(setStatus).catch(() => setStatus({ llm: false, label: "Offline parser (no API key)" }));
   }, []);
+
+  // Restore the saved chat once, after mount (so server and first client render match), then save on every change.
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      const saved = raw ? (JSON.parse(raw) as Record<string, unknown>) : null;
+      if (saved && typeof saved === "object") {
+        for (const k of PERSISTED) if (saved[k] !== undefined && !(k in store.current)) store.current[k] = saved[k]; // a quick-launch that already ran wins
+        const state = (store.current["chat.state"] ?? null) as ConversationState | null;
+        const view = (store.current["chat.view"] ?? null) as BookingView | null;
+        const ref = (store.current["chat.ref"] ??= { current: null }) as MutableRefObject<ConversationState | null>;
+        ref.current = state;
+        if (state && view) setCtx(toCtx(state, view));
+        bump();
+      }
+    } catch { /* corrupt or blocked storage: start fresh */ }
+    hydrated.current = true;
+  }, []);
+
+  useEffect(() => {
+    if (!hydrated.current) return;
+    try {
+      const out: Record<string, unknown> = {};
+      for (const k of PERSISTED) if (k in store.current) out[k] = store.current[k];
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(out));
+    } catch { /* storage full or blocked: the session still works, it just won't survive a refresh */ }
+  }, [version]);
 
   const requestLaunch = useCallback((k: LaunchKind) => { launchRef.current = k; }, []);
   const takeLaunch = useCallback(() => { const k = launchRef.current; launchRef.current = null; return k; }, []);

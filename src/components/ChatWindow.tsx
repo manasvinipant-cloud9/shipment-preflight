@@ -4,21 +4,40 @@ import type { ConversationState } from "@/lib/engine/conversation";
 import type { BookingView } from "@/lib/engine/view";
 import { EXAMPLE_MISTAKES, exampleClean, exampleNl } from "@/lib/examples";
 import { useSession, useSessionRef, useSessionState } from "./SessionProvider";
-import { STATUS_STAMP, Stamp, download, type Ctx } from "./ui";
+import { STATUS_STAMP, Stamp, download, toCtx, type Ctx } from "./ui";
+
+const STEPS = ["Parsing shipping manifest…", "Running Rulebook R-01 through R-10…", "Matching ratio-normalized rate cards…"];
+
+/** Step-by-step micro-messages with a skeleton of the reply. The steps are timed, not streamed: the API answers in one go. */
+function Working() {
+  const [i, setI] = useState(0);
+  useEffect(() => {
+    const t = [setTimeout(() => setI(1), 1100), setTimeout(() => setI(2), 2600)];
+    return () => t.forEach(clearTimeout);
+  }, []);
+  return (
+    <div className="line assistant working" role="status">
+      <span className="who">Operator</span>
+      <span className="txt">
+        <span className="steps-live">
+          {STEPS.map((s, n) => (
+            <span key={s} className={n < i ? "done" : n === i ? "now" : "later"}>
+              {n < i ? <i className="tick" aria-hidden>✓</i> : n === i ? <span className="spin" aria-hidden /> : <i className="tick" aria-hidden>○</i>}
+              {s}
+            </span>
+          ))}
+        </span>
+        <span className="skel-lines" aria-hidden><i className="skel" style={{ width: "92%" }} /><i className="skel" style={{ width: "74%" }} /><i className="skel" style={{ width: "48%" }} /></span>
+      </span>
+    </div>
+  );
+}
 
 type Msg = { role: "user" | "assistant"; text: string };
 
 const WELCOME =
   "TELEGRAPH ONLINE. Tell me about your shipment from the UK to Germany, France or the Netherlands: where it's going, pallets, " +
   "weight, and each product with its HS code, quantity and price. I'll ask only for what's missing and check everything before it goes anywhere.";
-
-function toCtx(state: ConversationState, view: BookingView): Ctx {
-  const r = state.phase === "collecting" ? null : state.last_report;
-  return {
-    source: "chat", label: "Telegraph session", shipment: state.shipment, priority: state.shipment.priority,
-    findings: r ? [...r.red, ...r.amber] : view.live, complete: !!r, report: r,
-  };
-}
 
 export default function ChatWindow({ today, offline, llm, onContext, hideDocket = false }: {
   today: string; offline: boolean; llm: boolean; onContext: (c: Ctx | null) => void;
@@ -31,10 +50,13 @@ export default function ChatWindow({ today, offline, llm, onContext, hideDocket 
   const [view, setView] = useSessionState<BookingView | null>("chat.view", null);
   const { takeLaunch } = useSession();
   const [input, setInput] = useState("");
-  const [busy, setBusy] = useState(false);
+  const [busy, setBusy] = useSessionState<boolean>("chat.busy", false);
+  const [, setDraft] = useSessionState<string>("chat.draft", "");
   const [failed, setFailed] = useState(false);
   const stateRef = useSessionRef<ConversationState | null>("chat.ref", null); // lets multi-step examples chain without stale state
   const logRef = useRef<HTMLDivElement>(null);
+  const draftTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const onDraft = (v: string) => { clearTimeout(draftTimer.current); draftTimer.current = setTimeout(() => setDraft(v), 300); };
 
   useEffect(() => { logRef.current?.scrollTo({ top: logRef.current.scrollHeight, behavior: "smooth" }); }, [msgs, busy]);
 
@@ -84,13 +106,14 @@ export default function ChatWindow({ today, offline, llm, onContext, hideDocket 
 
   async function submit() {
     const t = input;
-    setInput("");
+    clearTimeout(draftTimer.current);
+    setInput(""); setDraft("");
     await send(t);
   }
 
   function reset() {
     stateRef.current = null;
-    setState(null); setView(null); setFailed(false); setInput("");
+    setState(null); setView(null); setFailed(false); setInput(""); setDraft("");
     setMsgs([{ role: "assistant", text: WELCOME }]);
     onContext(null);
   }
@@ -121,7 +144,7 @@ export default function ChatWindow({ today, offline, llm, onContext, hideDocket 
             <span className="txt">{m.text}</span>
           </div>
         ))}
-        {busy && <div className="line assistant"><span className="who">Operator</span><span className="txt"><span className="spin" />checking…</span></div>}
+        {busy && <Working />}
       </div>
       {failed && <div className="notice warn">GEMINI CALL FAILED. Check <code>GEMINI_API_KEY</code> and quota in Vercel, or switch on Offline mode (START ▸ Control Panel).</div>}
 
@@ -152,7 +175,7 @@ export default function ChatWindow({ today, offline, llm, onContext, hideDocket 
       <div className="composer">
         <textarea
           value={input} rows={2} placeholder="Describe your shipment, or answer the operator…" aria-label="Message"
-          onChange={(e) => setInput(e.target.value)}
+          onChange={(e) => { setInput(e.target.value); onDraft(e.target.value); }}
           onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); if (!busy) void submit(); } }}
         />
         <div className="composer-btns">

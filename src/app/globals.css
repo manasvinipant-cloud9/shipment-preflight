@@ -421,3 +421,27 @@ table.grid{border-collapse:collapse;width:100%;font-size:var(--dp-typography-sma
 /* theme toggle: icon only on narrow screens so the top bar never overflows */
 @media (max-width:480px){.theme-toggle .tt-label{display:none}.theme-toggle{min-width:44px;padding:8px 12px}}
 .theme-switching *,.theme-switching *::before,.theme-switching *::after{transition:none!important}
+
+/* ---- live extraction pills, skeletons, auto-fix ---- */
+.skel{display:block;height:12px;border-radius:6px;background:linear-gradient(90deg,var(--dp-color-ground-muted) 25%,var(--surface) 50%,var(--dp-color-ground-muted) 75%);background-size:200% 100%;animation:shimmer 1.3s linear infinite}
+@keyframes shimmer{to{background-position:-200% 0}}
+.log .skel{background:linear-gradient(90deg,#1c212a 25%,#2a3140 50%,#1c212a 75%);background-size:200% 100%}
+.skel-lines{display:grid;gap:7px;margin-top:10px}
+.steps-live{display:grid;gap:3px}
+.steps-live .later{opacity:.45}.steps-live .done{opacity:.8}
+.steps-live .tick{font-style:normal;display:inline-block;width:20px;color:var(--st-green)}
+.log .steps-live .tick{color:#7be0b0}
+.pillbar{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 14px}
+.pill{display:inline-flex;gap:6px;align-items:baseline;border-radius:999px;padding:3px 11px;font-size:var(--dp-typography-metadata);border:1px solid var(--st-green-line);background:var(--st-green-bg);color:var(--dp-color-ink)}
+.pill i{font-style:normal;font-weight:800;color:var(--st-green)}
+.pill.draft{border-style:dashed;border-color:var(--dp-color-accent);background:transparent}
+.pill.draft i{color:var(--dp-color-accent)}
+.pill.fresh{animation:pill-pop .9s var(--dp-motion-easing)}
+@keyframes pill-pop{0%{transform:scale(.85);box-shadow:0 0 0 0 var(--st-green-fill)}40%{transform:scale(1.06);box-shadow:0 0 0 6px transparent}100%{transform:scale(1)}}
+.pill-skel{display:inline-block;width:130px;height:24px;border-radius:999px}
+.fixbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:8px}
+.fixbar a{text-decoration:underline}
+.fix-skel{width:160px;height:30px;border-radius:8px}
+.row-fixed td{animation:fixed-flash 3.2s ease-out}
+@keyframes fixed-flash{0%,60%{background:var(--st-green-bg);box-shadow:inset 4px 0 0 var(--st-green-fill)}100%{background:transparent}}
+@media (prefers-reduced-motion:reduce){.skel,.pill.fresh,.row-fixed td{animation:none}}

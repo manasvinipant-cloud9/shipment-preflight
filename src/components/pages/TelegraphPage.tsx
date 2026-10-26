@@ -1,9 +1,69 @@
 "use client";
 import Link from "next/link";
-import type { BookingView } from "@/lib/engine/view";
+import { useEffect, useRef, useState } from "react";
+import { Conversation, type ConversationState } from "@/lib/engine/conversation";
+import { ruleBasedExtract } from "@/lib/engine/extractor";
+import { buildView, type BookingView } from "@/lib/engine/view";
 import ChatWindow from "../ChatWindow";
 import { useSession, useSessionValue } from "../SessionProvider";
 import { PageHead, Panel, Stamp } from "../ui";
+
+type Pill = { key: string; label: string; value: string; fresh: boolean; draft: boolean };
+
+/** What the operator would read from the text still in the composer. Runs the keyless parser in the browser: no quota, no round trip. */
+function useDraftView(draft: string, state: ConversationState | null, today: string): BookingView | null {
+  const [preview, setPreview] = useState<BookingView | null>(null);
+  useEffect(() => {
+    let live = true;
+    if (!draft.trim() || !today) { setPreview(null); return; }
+    void (async () => {
+      try {
+        const conv = new Conversation(null, today, state ? structuredClone(state) : null);
+        const ops = await ruleBasedExtract(draft, conv.snapshot(), today);
+        if (!ops.length) { if (live) setPreview(null); return; }
+        conv.applyPatch(ops);
+        if (live) setPreview(buildView(conv));
+      } catch { if (live) setPreview(null); }
+    })();
+    return () => { live = false; };
+  }, [draft, state, today]);
+  return preview;
+}
+
+function buildPills(view: BookingView, prev: BookingView | null, draft: BookingView | null): Pill[] {
+  const had = new Map(prev?.fields.map((f) => [f.label, f.value]));
+  const pills: Pill[] = view.fields.filter((f) => f.value !== null).map((f) => ({
+    key: f.label, label: f.label, value: f.value!, fresh: !!prev && had.get(f.label) !== f.value, draft: false,
+  }));
+  if (view.fields.some((f) => f.value !== null) || view.items.length) pills.push({ key: "ccy", label: "Currency", value: "GBP", fresh: false, draft: false });
+  if (view.items.length) pills.push({ key: "items", label: "Items", value: String(view.items.length), fresh: !!prev && prev.items.length !== view.items.length, draft: false });
+  if (draft) {
+    const cur = new Map(view.fields.map((f) => [f.label, f.value]));
+    for (const f of draft.fields) if (f.value !== null && cur.get(f.label) !== f.value) pills.push({ key: `d-${f.label}`, label: f.label, value: f.value, fresh: false, draft: true });
+    if (draft.items.length > view.items.length) pills.push({ key: "d-items", label: "Items", value: String(draft.items.length), fresh: false, draft: true });
+  }
+  return pills;
+}
+
+function PillBar({ view, draft, busy }: { view: BookingView | null; draft: BookingView | null; busy: boolean }) {
+  const prev = useRef<BookingView | null>(null);
+  const before = prev.current;
+  useEffect(() => { prev.current = view; }, [view]);
+  const base = view ?? { fields: [], done: 0, total: 8, route: null, items: [], live: [] };
+  const pills = buildPills(base, before, draft);
+  if (!pills.length && !busy) return null;
+  return (
+    <div className="pillbar" aria-label="Details understood so far">
+      {pills.map((p) => (
+        <span key={p.key} className={`pill ${p.draft ? "draft" : "ok"} ${p.fresh ? "fresh" : ""}`}>
+          <i aria-hidden>{p.draft ? "…" : "✓"}</i><b>{p.label}</b> {p.value}
+          {p.draft && <span className="sr-only"> (from the text you are typing, not yet sent)</span>}
+        </span>
+      ))}
+      {busy && <><i className="skel pill-skel" aria-hidden /><i className="skel pill-skel" aria-hidden style={{ width: 96 }} /></>}
+    </div>
+  );
+}
 
 function Extraction({ view }: { view: BookingView | null }) {
   if (!view) {
@@ -50,6 +110,10 @@ function Extraction({ view }: { view: BookingView | null }) {
 export default function TelegraphPage() {
   const { today, offline, llm, setCtx, ctx } = useSession();
   const view = useSessionValue<BookingView | null>("chat.view", null);
+  const state = useSessionValue<ConversationState | null>("chat.state", null);
+  const draftText = useSessionValue<string>("chat.draft", "");
+  const busy = useSessionValue<boolean>("chat.busy", false);
+  const draft = useDraftView(draftText, state, today);
   return (
     <>
       <PageHead code="01" title="Telegraph" lead="Describe the shipment in plain English. The operator asks only for what is missing, and re-checks after every change." />
@@ -59,6 +123,7 @@ export default function TelegraphPage() {
         </Panel>
         <div className="stack">
           <Panel title="Live extraction" sub="What the operator has understood">
+            <PillBar view={view} draft={draft} busy={busy} />
             <Extraction view={view} />
           </Panel>
           {ctx?.source === "chat" && ctx.complete && (

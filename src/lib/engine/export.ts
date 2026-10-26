@@ -1,4 +1,5 @@
 // Download helpers (pure; used by the browser on the JSON results the batch API returns).
+import type { Shipment } from "./models";
 import type { PreflightReport } from "./report";
 
 export interface BatchRow {
@@ -10,6 +11,7 @@ export interface BatchRow {
   destination_city: string | null;
   destination_country: string | null;
   priority: string | null;
+  shipment: Shipment; // for the item grid and the what-if rate matrix
 }
 
 const esc = (v: unknown) => {

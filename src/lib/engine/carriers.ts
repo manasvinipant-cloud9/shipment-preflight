@@ -178,3 +178,64 @@ export function justify(
   }
   return parts.join(" ");
 }
+
+// ----------------------------------------------------------------------------------------- rate matrix
+export type MatrixStatus = "recommended" | "ranked" | "cost-capped" | "too-heavy";
+
+export interface MatrixRow {
+  carrier: string;
+  service: string;
+  cost_gbp: number;
+  transit_days: number;
+  on_time_pct: number;
+  max_pallet_kg: number;
+  score: number | null; // weighted score (0-100) for services that stay in the ranking
+  cost_ratio: number | null; // best cost / this cost: 1.00 = cheapest; the normalisation that stops outliers skewing the ranking
+  rank: number | null;
+  status: MatrixStatus;
+  note: string;
+}
+
+export interface Matrix {
+  priority: string;
+  pallets: number;
+  rows: MatrixRow[];
+  justification: string;
+}
+
+/** Every service on the route with its rank and the reason it was recommended, ranked, cost-capped or excluded. */
+export function buildMatrix(s: Shipment, priority: string | null, card: Lane[] = DEFAULT_RATE_CARD): Matrix {
+  const pr = priority && priority in WEIGHTS ? priority : "Balanced";
+  const pallets = s.pallets || 1;
+  if (!s.destination_country) return { priority: pr, pallets, rows: [], justification: "Add a destination country to see carrier rates." };
+  const options = laneOptions(s, card);
+  const heavy = options.filter((o) => !fits(s, o));
+  const [ranked, dropped] = rankOptions(options.filter((o) => fits(s, o)), pr);
+  const pool = [...ranked, ...dropped];
+  const bestCost = pool.length ? pool.reduce((m, o) => (o.cost_gbp.lessThan(m) ? o.cost_gbp : m), pool[0].cost_gbp) : null;
+  const pp = perPalletKg(s);
+  const base = (o: Option) => ({
+    carrier: o.lane.name, service: o.lane.service, cost_gbp: o.cost_gbp.toNumber(), transit_days: o.lane.transit_days,
+    on_time_pct: o.lane.on_time_pct.toNumber(), max_pallet_kg: o.lane.max_pallet_kg.toNumber(),
+  });
+  const ratio = (o: Option) => (bestCost ? Number(bestCost.div(o.cost_gbp).toFixed(2)) : null);
+  const rows: MatrixRow[] = [
+    ...ranked.map((o, i): MatrixRow => ({
+      ...base(o), score: Number(o.score.toFixed(1)), cost_ratio: ratio(o), rank: i + 1,
+      status: i === 0 ? "recommended" : "ranked",
+      note: i === 0 ? `Best fit for '${pr}'` : `Rank ${i + 1} for '${pr}'`,
+    })),
+    ...dropped.map((o): MatrixRow => ({
+      ...base(o), score: null, cost_ratio: ratio(o), rank: null, status: "cost-capped",
+      note: `Over the ${g(COST_CAP[pr]!)}x cost cap for '${pr}': not considered`,
+    })),
+    ...heavy.map((o): MatrixRow => ({
+      ...base(o), score: null, cost_ratio: null, rank: null, status: "too-heavy",
+      note: `${pp ? fixed(pp, 0) : "?"} kg per pallet is over its ${g(o.lane.max_pallet_kg)} kg limit`,
+    })),
+  ];
+  const justification = ranked.length
+    ? justify(s, ranked, pr, dropped, options)
+    : "No carrier on this route can take this load as declared, so no recommendation can be made yet.";
+  return { priority: pr, pallets, rows, justification };
+}

@@ -248,6 +248,6 @@ export function toRow(r: BookingResult): BatchRow {
   const s = r.shipment;
   return {
     booking_id: r.booking_id, notes: r.notes, report: r.report, seller_name: s.seller_name, origin_city: s.origin_city,
-    destination_city: s.destination_city, destination_country: s.destination_country, priority: s.priority,
+    destination_city: s.destination_city, destination_country: s.destination_country, priority: s.priority, shipment: s,
   };
 }

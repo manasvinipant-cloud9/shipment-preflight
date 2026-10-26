@@ -1,5 +1,6 @@
 "use client";
 import { useRef, useState } from "react";
+import { useSessionState } from "./SessionProvider";
 import { confirmationsText, findingsCsv, type BatchRow } from "@/lib/engine/export";
 import { SAMPLE_NOTES } from "@/lib/examples";
 import RateRulebook from "./RateRulebook";
@@ -41,7 +42,7 @@ function Inspector({ row }: { row: BatchRow }) {
         <span>APPT <b className={s.destination_type === "Warehouse" && s.delivery_appointment_booked !== "Yes" ? "warn" : ""}>{s.delivery_appointment_booked ?? "?"}</b></span>
         <span>PRIORITY <b>{s.priority}</b></span>
       </div>
-      <div className="tbl-wrap">
+      <div className="tbl-wrap" role="region" aria-label="Item grid (scrollable table)" tabIndex={0}>
         <table className="grid items">
           <thead><tr><th>SKU</th><th>DESCRIPTION</th><th>HS CODE</th><th>QTY</th><th>£/UNIT</th><th>UNITS/CTN</th><th>CTNS</th><th>KG/UNIT</th><th>LINE KG</th><th>ORIGIN</th></tr></thead>
           <tbody>
@@ -71,13 +72,14 @@ function Inspector({ row }: { row: BatchRow }) {
 }
 
 export default function ManifestWindow({ today, onContext }: { today: string; onContext: (c: Ctx | null) => void }) {
-  const [rows, setRows] = useState<BatchRow[] | null>(null);
-  const [fileNotes, setFileNotes] = useState<string[]>([]);
-  const [label, setLabel] = useState("");
+  // The uploaded batch and the selected booking live in the session so they survive page changes.
+  const [rows, setRows] = useSessionState<BatchRow[] | null>("manifest.rows", null);
+  const [fileNotes, setFileNotes] = useSessionState<string[]>("manifest.notes", []);
+  const [label, setLabel] = useSessionState("manifest.label", "");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
-  const [filter, setFilter] = useState<Filter>("All");
-  const [sel, setSel] = useState<string | null>(null);
+  const [filter, setFilter] = useSessionState<Filter>("manifest.filter", "All");
+  const [sel, setSel] = useSessionState<string | null>("manifest.sel", null);
   const [over, setOver] = useState(false);
   const input = useRef<HTMLInputElement>(null);
 
@@ -151,7 +153,7 @@ export default function ManifestWindow({ today, onContext }: { today: string; on
             ))}</span>
           </div>
 
-          <div className="tbl-wrap list">
+          <div className="tbl-wrap list" role="region" aria-label="Uploaded bookings (scrollable table)" tabIndex={0}>
             <table className="grid pick">
               <thead><tr><th>BOOKING</th><th>STATUS</th><th>SELLER</th><th>ROUTE</th><th>PRIORITY</th><th>RED</th><th>AMBER</th><th>RULES HIT</th><th>RECOMMENDED</th><th>COST</th></tr></thead>
               <tbody>{shown.map(({ r, key }) => {

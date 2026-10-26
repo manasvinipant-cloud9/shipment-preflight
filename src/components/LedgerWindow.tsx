@@ -26,7 +26,7 @@ export default function LedgerWindow({ ctx }: { ctx: Ctx | null }) {
           <span className="mono small">RED {count("RED")} · AMBER {count("AMBER")} · PASS {count("PASS")}</span>
         </span>
       </div>
-      <div className="tbl-wrap">
+      <div className="tbl-wrap" role="region" aria-label="Rule ledger (scrollable table)" tabIndex={0}>
         <table className="grid">
           <thead><tr><th>RULE</th><th>CHECK</th><th>SEV</th><th>STATUS</th></tr></thead>
           <tbody>

@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import type { ConversationState } from "@/lib/engine/conversation";
 import type { BookingView } from "@/lib/engine/view";
 import { EXAMPLE_MISTAKES, exampleClean, exampleNl } from "@/lib/examples";
+import { useSession, useSessionRef, useSessionState } from "./SessionProvider";
 import { STATUS_STAMP, Stamp, download, type Ctx } from "./ui";
 
 type Msg = { role: "user" | "assistant"; text: string };
@@ -19,16 +20,20 @@ function toCtx(state: ConversationState, view: BookingView): Ctx {
   };
 }
 
-export default function ChatWindow({ today, offline, llm, onContext }: {
+export default function ChatWindow({ today, offline, llm, onContext, hideDocket = false }: {
   today: string; offline: boolean; llm: boolean; onContext: (c: Ctx | null) => void;
+  /** The Telegraph page shows the same data in its live extraction panel, so it hides the inline docket. */
+  hideDocket?: boolean;
 }) {
-  const [msgs, setMsgs] = useState<Msg[]>([{ role: "assistant", text: WELCOME }]);
-  const [state, setState] = useState<ConversationState | null>(null);
-  const [view, setView] = useState<BookingView | null>(null);
+  // Chat state lives in the session so it survives moving to the Customs / Freight pages and back.
+  const [msgs, setMsgs] = useSessionState<Msg[]>("chat.msgs", [{ role: "assistant", text: WELCOME }]);
+  const [state, setState] = useSessionState<ConversationState | null>("chat.state", null);
+  const [view, setView] = useSessionState<BookingView | null>("chat.view", null);
+  const { takeLaunch } = useSession();
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
   const [failed, setFailed] = useState(false);
-  const stateRef = useRef<ConversationState | null>(null); // lets multi-step examples chain without stale state
+  const stateRef = useSessionRef<ConversationState | null>("chat.ref", null); // lets multi-step examples chain without stale state
   const logRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => { logRef.current?.scrollTo({ top: logRef.current.scrollHeight, behavior: "smooth" }); }, [msgs, busy]);
@@ -54,7 +59,7 @@ export default function ChatWindow({ today, offline, llm, onContext }: {
       const r = next.last_report;
       if (r && reply.includes(r.summary)) { // the full slip is shown below the log; keep the line short
         const nxt = r.status !== "BLOCKED" ? "Press CONFIRM BOOKING, or send corrections." : "Send the corrections and I'll re-check straight away.";
-        reply = reply.replace(r.summary, `PRE-FLIGHT DONE: ${r.status}. See the Ledger and Rate Matrix windows. ${nxt}`);
+        reply = reply.replace(r.summary, `PRE-FLIGHT DONE: ${r.status}. See the Customs and Freight pages. ${nxt}`);
       }
       if (reply.startsWith("Sorry, I couldn't read")) setFailed(true);
       setMsgs((m) => [...m, { role: "assistant", text: reply }]);
@@ -64,6 +69,18 @@ export default function ChatWindow({ today, offline, llm, onContext }: {
       setBusy(false);
     }
   }
+
+  // A quick-launch pressed on the Overview page runs here, once, after the Telegraph mounts.
+  useEffect(() => {
+    const k = takeLaunch();
+    if (!k) return;
+    void (async () => {
+      if (k === "clean") await send(exampleClean(today));
+      else if (k === "mistakes") await send(EXAMPLE_MISTAKES);
+      else { await send(exampleClean(today)); await send("add a pallet"); }
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   async function submit() {
     const t = input;
@@ -97,7 +114,7 @@ export default function ChatWindow({ today, offline, llm, onContext }: {
         <button className="btn" disabled={busy || !llm || offline} title={llm && !offline ? "Free-text booking via Gemini" : "Needs Gemini (set GEMINI_API_KEY)"} onClick={() => send(exampleNl(today))}>▶ Plain English</button>
       </div>
 
-      <div className="log" ref={logRef} aria-live="polite">
+      <div className="log" ref={logRef} role="log" aria-live="polite" aria-label="Conversation" tabIndex={0}>
         {msgs.map((m, i) => (
           <div key={i} className={`line ${m.role}`}>
             <span className="who">{m.role === "assistant" ? "Operator" : "Seller"}</span>
@@ -108,7 +125,7 @@ export default function ChatWindow({ today, offline, llm, onContext }: {
       </div>
       {failed && <div className="notice warn">GEMINI CALL FAILED. Check <code>GEMINI_API_KEY</code> and quota in Vercel, or switch on Offline mode (START ▸ Control Panel).</div>}
 
-      {state && view && (
+      {!hideDocket && state && view && (
         <details className="docket">
           <summary>BOOKING DOCKET · {view.done}/{view.total} details · {view.items.length} item(s){view.route ? ` · ${view.route}` : ""}</summary>
           <div className="chips">
@@ -122,7 +139,7 @@ export default function ChatWindow({ today, offline, llm, onContext }: {
         <div className="slip">
           <div className="slip-head"><Stamp kind={st.kind}>{st.text}</Stamp>
             <span className="mono small">{report.red.length} red · {report.amber.length} amber</span></div>
-          <pre className="slip-text">{report.summary}</pre>
+          <pre className="slip-text" tabIndex={0} aria-label="Confirmation summary">{report.summary}</pre>
           <div className="row-btns">
             {state?.phase === "confirming" && report.status !== "BLOCKED" && <button className="btn primary" disabled={busy} onClick={() => send("confirm")}>CONFIRM BOOKING</button>}
             {state?.phase === "booked" && <Stamp kind="green">[BOOKED]</Stamp>}

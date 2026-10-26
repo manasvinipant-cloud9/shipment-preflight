@@ -1,5 +1,5 @@
-import App from "@/components/App";
+import Overview from "@/components/pages/Overview";
 
 export default function Page() {
-  return <App />;
+  return <Overview />;
 }

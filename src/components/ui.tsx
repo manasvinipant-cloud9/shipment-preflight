@@ -38,23 +38,33 @@ export function download(filename: string, text: string, mime = "text/plain") {
 
 export const gbp = (n: number) => `£${n.toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
-export function Win({
-  id, title, sub, minimized, maximized, onMin, onMax, children,
-}: {
-  id: string; title: string; sub: string; minimized: boolean; maximized: boolean;
-  onMin: () => void; onMax: () => void; children: React.ReactNode;
+/** A titled card. Each page is a set of these; there is no minimize/maximize any more because each tool now has its own page. */
+export function Panel({ id, title, sub, actions, className = "", children }: {
+  id?: string; title: string; sub?: string; actions?: React.ReactNode; className?: string; children: React.ReactNode;
 }) {
   return (
-    <section id={`win-${id}`} className={`win win-${id}${maximized ? " max" : ""}${minimized ? " min" : ""}`} aria-label={title}>
+    <section id={id} className={`panel ${className}`} aria-label={title}>
       <header className="titlebar">
-        <h3 className="tb-title">{title}</h3>
-        <span className="tb-sub">{sub}</span>
-        <span className="tb-btns">
-          <button className="tb-btn" aria-label={`${minimized ? "Restore" : "Minimize"} ${title}`} aria-expanded={!minimized} onClick={onMin}>{minimized ? "＋" : "－"}</button>
-          <button className="tb-btn" aria-label={`${maximized ? "Restore size of" : "Maximize"} ${title}`} aria-pressed={maximized} onClick={onMax}>{maximized ? "⤡" : "⤢"}</button>
-        </span>
+        <h2 className="tb-title">{title}</h2>
+        {sub && <span className="tb-sub">{sub}</span>}
+        {actions && <span className="tb-btns">{actions}</span>}
       </header>
-      <div className="win-body" hidden={minimized}>{children}</div>
+      <div className="panel-body">{children}</div>
     </section>
+  );
+}
+
+export function PageHead({ code, title, lead, children }: { code: string; title: string; lead: string; children?: React.ReactNode }) {
+  return (
+    <header className="phead">
+      <div className="wrap phead-in">
+        <div>
+          <span className="stencil-tag" aria-hidden>{code}</span>
+          <h1>{title}</h1>
+          <p className="phead-lead">{lead}</p>
+        </div>
+        {children && <div className="phead-actions">{children}</div>}
+      </div>
+    </header>
   );
 }

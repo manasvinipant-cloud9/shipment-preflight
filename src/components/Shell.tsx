@@ -1,4 +1,5 @@
 "use client";
+import ThemeToggle from "./ThemeToggle";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState, type ReactNode } from "react";
@@ -95,6 +96,7 @@ export default function Shell({ children }: { children: ReactNode }) {
           </nav>
           <span className="topright">
             <span className={`mode${live ? " live" : ""}`}><i />{pill}</span>
+            <ThemeToggle />
             <button className="btn small" onClick={() => setMenu((m) => !m)} aria-expanded={menu} aria-haspopup="dialog">Settings</button>
           </span>
         </div>

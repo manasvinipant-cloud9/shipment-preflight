@@ -24,6 +24,10 @@ describe("sanitizeOps", () => {
       { op: "set", field: "pallets", value: "2" },
       { op: "upsert_item", sku: "A", fields: { hs_code: "610910" } },
     ]);
+    // a model rambling inside a value is dropped, not stored
+    const rant = "x".repeat(300);
+    expect(sanitizeOps([{ op: "set", field: "seller_name", value: rant }, { op: "upsert_item", sku: "A", fields: { description: "ok", country_of_origin: rant } }]))
+      .toEqual([{ op: "upsert_item", sku: "A", fields: { description: "ok" } }]);
     expect(sanitizeOps("nope")).toEqual([]);
     expect(sanitizeOps(null)).toEqual([]);
   });

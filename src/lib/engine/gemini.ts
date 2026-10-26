@@ -31,22 +31,22 @@ const redact = (s: string) => s.replace(/AIza[0-9A-Za-z_-]{10,}/g, "[key]");
 const AUTH_ERROR = /API key not valid|API_KEY_INVALID|"code":\s*40[13]|PERMISSION_DENIED|UNAUTHENTICATED/i;
 
 export interface Variant { schema: boolean; thinking: boolean }
-type Generate = (model: string, contents: string, v: Variant) => Promise<string | undefined>;
+type Generate = (model: string, contents: string, v: Variant, level?: string) => Promise<string | undefined>;
 
 // Extraction is a text-to-fields job: Gemini 3 models "think" for many seconds by default, which made real calls time out.
 // GEMINI_THINKING_LEVEL = minimal | low (default) | medium | high | off (send no thinking setting).
 const THINKING: Record<string, ThinkingLevel> = {
   minimal: ThinkingLevel.MINIMAL, low: ThinkingLevel.LOW, medium: ThinkingLevel.MEDIUM, high: ThinkingLevel.HIGH,
 };
-const thinkingConfig = () => {
-  const level = (process.env.GEMINI_THINKING_LEVEL ?? "low").toLowerCase();
+const thinkingConfig = (override?: string) => {
+  const level = (override ?? process.env.GEMINI_THINKING_LEVEL ?? "low").toLowerCase();
   return level in THINKING ? { thinkingConfig: { thinkingLevel: THINKING[level] } } : {};
 };
 
 const MODEL_TIMEOUT_MS = 12_000;
 const BUDGET_MS = 28_000; // whole request; the function limit is 60 s
 
-const realGenerate: Generate = async (model, contents, v) => {
+const realGenerate: Generate = async (model, contents, v, level) => {
   const res = await ai().models.generateContent({
     model,
     contents,
@@ -54,7 +54,7 @@ const realGenerate: Generate = async (model, contents, v) => {
       systemInstruction: SYSTEM_PROMPT,
       responseMimeType: "application/json",
       ...(v.schema ? { responseJsonSchema: OPS_SCHEMA } : {}),
-      ...(v.thinking ? thinkingConfig() : {}),
+      ...(v.thinking ? thinkingConfig(level) : {}),
       temperature: 0,
       abortSignal: AbortSignal.timeout(MODEL_TIMEOUT_MS),
     },
@@ -138,19 +138,19 @@ export async function probeModels(): Promise<ProbeResult[]> {
 
 export interface ExtractProbe { model: string; ok: boolean; ms: number; ops?: number; fields?: string[]; raw?: string; error?: string }
 
-let extractCache: { at: number; results: ExtractProbe[] } | null = null;
+let extractCache: { at: number; level: string; results: ExtractProbe[] } | null = null;
 const PROBE_MESSAGE = "I need to send 2 pallets of ceramic mugs from Manchester to a warehouse in Frankfurt, ready on 9 November 2026. " +
   "620 kg in total and 90 cartons. It's 1080 mugs (90 cartons of 12) at £5 each, 0.5 kg each, HS code 691200, made in the UK. " +
   "Declared value £5,400, appointment already booked. Balanced please.";
 
 /** Runs the REAL extraction prompt on a fixed message with every model (no cooldowns), so latency and quality are measurable. */
-export async function probeExtraction(): Promise<ExtractProbe[]> {
-  if (extractCache && Date.now() - extractCache.at < 120_000) return extractCache.results;
+export async function probeExtraction(level = "default"): Promise<ExtractProbe[]> {
+  if (extractCache && extractCache.level === level && Date.now() - extractCache.at < 20_000) return extractCache.results;
   const payload = JSON.stringify({ today: "2026-10-26", state: { shipment: {}, items: [], stale: [], phase: "collecting", asking: [] }, seller_message: PROBE_MESSAGE }, null, 1);
   const results = await Promise.all(modelChain().map(async (model): Promise<ExtractProbe> => {
     const t0 = Date.now();
     try {
-      const raw = await realGenerate(model, payload, VARIANTS[0]);
+      const raw = await realGenerate(model, payload, VARIANTS[0], level === "default" ? undefined : level);
       const ops = sanitizeOps(parseModelJson(raw ?? ""));
       const fields = ops.flatMap((o) => (o.op === "set" ? [String(o.field)] : o.op === "upsert_item" ? Object.keys((o.fields as object) ?? {}).map((k) => `item.${k}`) : []));
       return { model, ok: true, ms: Date.now() - t0, ops: ops.length, fields, raw: (raw ?? "").replace(/\s+/g, " ").slice(0, 1200) };
@@ -158,6 +158,6 @@ export async function probeExtraction(): Promise<ExtractProbe[]> {
       return { model, ok: false, ms: Date.now() - t0, error: redact(e instanceof Error ? e.message : String(e)).slice(0, 160) };
     }
   }));
-  extractCache = { at: Date.now(), results };
+  extractCache = { at: Date.now(), level, results };
   return results;
 }

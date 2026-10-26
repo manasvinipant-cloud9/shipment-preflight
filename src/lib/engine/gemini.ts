@@ -136,7 +136,7 @@ export async function probeModels(): Promise<ProbeResult[]> {
   return results;
 }
 
-export interface ExtractProbe { model: string; ok: boolean; ms: number; ops?: number; fields?: string[]; error?: string }
+export interface ExtractProbe { model: string; ok: boolean; ms: number; ops?: number; fields?: string[]; raw?: string; error?: string }
 
 let extractCache: { at: number; results: ExtractProbe[] } | null = null;
 const PROBE_MESSAGE = "I need to send 2 pallets of ceramic mugs from Manchester to a warehouse in Frankfurt, ready on 9 November 2026. " +
@@ -153,7 +153,7 @@ export async function probeExtraction(): Promise<ExtractProbe[]> {
       const raw = await realGenerate(model, payload, VARIANTS[0]);
       const ops = sanitizeOps(parseModelJson(raw ?? ""));
       const fields = ops.flatMap((o) => (o.op === "set" ? [String(o.field)] : o.op === "upsert_item" ? Object.keys((o.fields as object) ?? {}).map((k) => `item.${k}`) : []));
-      return { model, ok: true, ms: Date.now() - t0, ops: ops.length, fields };
+      return { model, ok: true, ms: Date.now() - t0, ops: ops.length, fields, raw: (raw ?? "").replace(/\s+/g, " ").slice(0, 1200) };
     } catch (e) {
       return { model, ok: false, ms: Date.now() - t0, error: redact(e instanceof Error ? e.message : String(e)).slice(0, 160) };
     }

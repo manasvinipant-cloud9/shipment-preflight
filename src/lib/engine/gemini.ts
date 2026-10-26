@@ -101,17 +101,43 @@ export function makeGeminiExtractor(generate: Generate = realGenerate, models: (
   };
 }
 
+/** Clearly structured input: `field: value` lines, `item X: ...` lines, or pasted JSON. The built-in parser reads these exactly. */
+export function looksStructured(text: string): boolean {
+  const t = text.trim();
+  if (t.startsWith("{")) return true;
+  const lines = t.split(/\n/).map((l) => l.trim()).filter(Boolean);
+  if (lines.length < 3) return false;
+  const structured = lines.filter((l) => /^item\s+\S+\s*[:-]/i.test(l) || /^[a-z][a-z _/]*\s*[:=]\s*\S/i.test(l)).length;
+  return structured / lines.length >= 0.7;
+}
+
 /**
- * Short control messages ("confirm", "add a pallet", "unchanged", "4", "unknown") are answered by the deterministic parser:
- * instant, free, and they keep working even when the model is busy. Anything longer or unrecognised goes to Gemini.
+ * The model is only needed for free text. Short control messages ("confirm", "add a pallet", "unchanged", "4", "unknown")
+ * and structured input (the example buttons, `field: value` lines, JSON) go to the deterministic parser: instant, exact, and
+ * they spend no Gemini quota, so they keep working even when the model is busy or out of quota.
  */
 export function withQuickCommands(llm: Extractor): Extractor {
   return async (text, snapshot, today) => {
-    if (text.length <= 30 && !text.includes("\n")) {
-      const quick = await ruleBasedExtract(text, snapshot, today);
+    if ((text.length <= 30 && !text.includes("\n")) || looksStructured(text)) {
+      const quick = await ruleBasedExtract(text, snapshot, today).catch(() => []);
       if (quick.length) return quick;
     }
     return llm(text, snapshot, today);
+  };
+}
+
+/** If Gemini fails outright (quota, outage, bad key), structured text still works through the built-in parser. */
+export function withOfflineFallback(llm: Extractor): Extractor {
+  return async (text, snapshot, today) => {
+    try {
+      return await llm(text, snapshot, today);
+    } catch (e) {
+      if (e instanceof ExtractorError) {
+        const ops = await ruleBasedExtract(text, snapshot, today).catch(() => []);
+        if (ops.length) return ops;
+      }
+      throw e;
+    }
   };
 }
 
@@ -124,7 +150,7 @@ export interface ExtractorChoice {
 /** Gemini when a key is configured (and offline wasn't forced), otherwise the keyless offline parser. */
 export function getExtractor(opts: { offline?: boolean } = {}): ExtractorChoice {
   if (!opts.offline && hasGeminiKey()) {
-    return { extractor: withQuickCommands(makeGeminiExtractor()), label: `Gemini (${modelChain()[0]})`, llm: true };
+    return { extractor: withQuickCommands(withOfflineFallback(makeGeminiExtractor())), label: `Gemini (${modelChain()[0]})`, llm: true };
   }
   return { extractor: ruleBasedExtract, label: opts.offline ? "Offline parser (switched on)" : "Offline parser (no API key)", llm: false };
 }

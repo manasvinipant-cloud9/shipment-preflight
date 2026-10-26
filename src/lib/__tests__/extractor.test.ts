@@ -5,7 +5,7 @@ import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import { Conversation, ExtractorError, type Snapshot } from "../engine/conversation";
 import { OPS_SCHEMA, repairItemOps, ruleBasedExtract, sanitizeOps } from "../engine/extractor";
-import { getExtractor, makeGeminiExtractor, modelChain, withQuickCommands } from "../engine/gemini";
+import { getExtractor, looksStructured, makeGeminiExtractor, modelChain, withOfflineFallback, withQuickCommands } from "../engine/gemini";
 
 const TODAY = "2026-10-25";
 const demo = readFileSync(join(process.cwd(), "public/samples/demo_chat.txt"), "utf8");
@@ -193,6 +193,33 @@ describe("quick commands", () => {
     await ex("make it 3 pallets please", snap(), TODAY); // not a recognised command: the model decides
     await ex("pallets: 2\ncountry: Germany", snap(), TODAY); // multi-line: the model decides
     expect(calls).toBe(2);
+  });
+});
+
+describe("structured input and fallback (no Gemini quota)", () => {
+  const NL = "I need to send 2 pallets of ceramic mugs from Manchester to a warehouse in Frankfurt, ready on 9 November 2026. 620 kg in total.";
+  it("recognises structured input and leaves free text to the model", () => {
+    expect(looksStructured(demo)).toBe(true);
+    expect(looksStructured('{"pallets": 2}')).toBe(true);
+    expect(looksStructured("pallets: 2\ncountry: Germany")).toBe(false); // too short to be sure
+    expect(looksStructured(NL)).toBe(false);
+    expect(looksStructured("Hi,\nI want to ship stuff: mugs\nthanks\nbye")).toBe(false);
+  });
+
+  it("parses structured text without calling the model", async () => {
+    let calls = 0;
+    const ex = withQuickCommands(async () => { calls++; return []; });
+    const ops = await ex(demo, snap(), TODAY);
+    expect(ops.length).toBeGreaterThan(10);
+    expect(calls).toBe(0);
+    await ex(NL, snap(), TODAY);
+    expect(calls).toBe(1);
+  });
+
+  it("falls back to the built-in parser when the model fails, but still reports failure for free text", async () => {
+    const failing = withOfflineFallback(async () => { throw new ExtractorError("quota"); });
+    expect((await failing("pallets: 2", snap(), TODAY)).length).toBe(1);
+    await expect(failing(NL, snap(), TODAY)).rejects.toBeInstanceOf(ExtractorError);
   });
 });
 

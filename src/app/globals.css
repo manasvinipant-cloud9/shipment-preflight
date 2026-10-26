@@ -109,6 +109,7 @@ code{font-family:var(--font-mono),monospace;font-size:.85em;background:#fff;bord
 table.grid{border-collapse:collapse;width:100%;font-size:.85rem}
 .grid th{position:sticky;top:0;background:var(--dp-color-window);text-align:left;padding:4px 8px;font-family:var(--font-mono),monospace;font-size:.7rem;letter-spacing:.05em;border-bottom:2px solid var(--dp-color-shadow);white-space:nowrap}
 .grid td{padding:5px 8px;border-bottom:1px solid #d0d0d0;vertical-align:top}
+.grid td:first-child,.grid th:first-child{white-space:nowrap}
 .row-red td{background:#fff0f0}.row-amber td{background:#fffbd0}
 .grid tr.detail td{background:#fafafa;border-bottom:1px solid #bbb}
 .fix{margin-top:2px}.fix b{color:var(--dp-color-title)}

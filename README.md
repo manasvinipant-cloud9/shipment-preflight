@@ -34,8 +34,11 @@ Local: `.env.local` (git-ignored). Production: Vercel → Project → Settings �
 | Variable | Purpose |
 |---|---|
 | `GEMINI_API_KEY` (or `GOOGLE_API_KEY`) | Enables plain-English chat. Server-only; the browser never sees it. |
-| `GEMINI_MODEL` | Primary model. Default `gemini-3.7-flash`. |
-| `GEMINI_FALLBACK_MODELS` | Comma-separated models tried in order when the primary is out of quota (429), overloaded (503) or retired (404). |
+| `GEMINI_MODEL` | Primary model. Default `gemini-3-flash-preview` (measured fastest and most complete on this task). |
+| `GEMINI_FALLBACK_MODELS` | Comma-separated models tried in order when the primary is out of quota (429), overloaded (503) or retired (404). A failed model is skipped for 5 minutes. |
+| `GEMINI_THINKING_LEVEL` | `minimal`, `low` (default), `medium`, `high` or `off`. Low keeps extraction to ~2 s. |
+
+To see which models work with your key and how fast, open `/api/status?probe=extract` (runs the real extraction prompt per model).
 
 A wrong key fails fast with a clear message in the chat. The header has an **Offline mode** switch for demos if the API is slow.
 

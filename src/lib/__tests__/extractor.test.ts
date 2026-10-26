@@ -173,7 +173,7 @@ describe("configuration", () => {
     expect(getExtractor().label).toContain("no API key");
     process.env.GEMINI_API_KEY = "k";
     expect(getExtractor().llm).toBe(true);
-    expect(getExtractor().label).toContain("gemini-3.7-flash");
+    expect(getExtractor().label).toContain("gemini-3-flash-preview");
     expect(getExtractor({ offline: true }).llm).toBe(false);
   });
 
@@ -185,9 +185,9 @@ describe("configuration", () => {
 
   it("model precedence: GEMINI_MODEL, then a gemini PREFLIGHT_MODEL, then the default; fallbacks follow", () => {
     clear();
-    expect(modelChain()[0]).toBe("gemini-3.7-flash");
+    expect(modelChain()[0]).toBe("gemini-3-flash-preview");
     process.env.PREFLIGHT_MODEL = "claude-opus-5-5"; // a non-Gemini id must not leak into Gemini calls
-    expect(modelChain()[0]).toBe("gemini-3.7-flash");
+    expect(modelChain()[0]).toBe("gemini-3-flash-preview");
     process.env.PREFLIGHT_MODEL = "gemini-x-pro";
     expect(modelChain()[0]).toBe("gemini-x-pro");
     process.env.GEMINI_MODEL = "gemini-y";

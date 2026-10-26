@@ -5,8 +5,10 @@ import { GoogleGenAI, ThinkingLevel } from "@google/genai";
 import { ExtractorError, type Extractor, type Op, type Snapshot } from "./conversation";
 import { OPS_SCHEMA, SYSTEM_PROMPT, parseModelJson, ruleBasedExtract, sanitizeOps } from "./extractor";
 
-const DEFAULT_MODEL = "gemini-3.7-flash";
-const DEFAULT_FALLBACKS = "gemini-3.6-flash,gemini-3.5-flash,gemini-3-flash-preview,gemini-3.5-flash-lite,gemini-3.1-flash-lite";
+// Measured on the real extraction prompt (see /api/status?probe=extract): gemini-3-flash-preview captured every field in
+// every run in ~1.7 s; gemini-3.7-flash was returning 503 "high demand". Override with GEMINI_MODEL.
+const DEFAULT_MODEL = "gemini-3-flash-preview";
+const DEFAULT_FALLBACKS = "gemini-3.5-flash,gemini-3.6-flash,gemini-3.7-flash,gemini-3.5-flash-lite,gemini-3.1-flash-lite";
 
 export const hasGeminiKey = () => Boolean(process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY);
 

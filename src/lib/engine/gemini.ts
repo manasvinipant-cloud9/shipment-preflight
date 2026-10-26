@@ -101,6 +101,20 @@ export function makeGeminiExtractor(generate: Generate = realGenerate, models: (
   };
 }
 
+/**
+ * Short control messages ("confirm", "add a pallet", "unchanged", "4", "unknown") are answered by the deterministic parser:
+ * instant, free, and they keep working even when the model is busy. Anything longer or unrecognised goes to Gemini.
+ */
+export function withQuickCommands(llm: Extractor): Extractor {
+  return async (text, snapshot, today) => {
+    if (text.length <= 30 && !text.includes("\n")) {
+      const quick = await ruleBasedExtract(text, snapshot, today);
+      if (quick.length) return quick;
+    }
+    return llm(text, snapshot, today);
+  };
+}
+
 export interface ExtractorChoice {
   extractor: Extractor;
   label: string;
@@ -110,7 +124,7 @@ export interface ExtractorChoice {
 /** Gemini when a key is configured (and offline wasn't forced), otherwise the keyless offline parser. */
 export function getExtractor(opts: { offline?: boolean } = {}): ExtractorChoice {
   if (!opts.offline && hasGeminiKey()) {
-    return { extractor: makeGeminiExtractor(), label: `Gemini (${modelChain()[0]})`, llm: true };
+    return { extractor: withQuickCommands(makeGeminiExtractor()), label: `Gemini (${modelChain()[0]})`, llm: true };
   }
   return { extractor: ruleBasedExtract, label: opts.offline ? "Offline parser (switched on)" : "Offline parser (no API key)", llm: false };
 }

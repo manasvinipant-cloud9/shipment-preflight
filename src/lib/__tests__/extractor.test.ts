@@ -5,7 +5,7 @@ import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import { Conversation, ExtractorError, type Snapshot } from "../engine/conversation";
 import { OPS_SCHEMA, repairItemOps, ruleBasedExtract, sanitizeOps } from "../engine/extractor";
-import { getExtractor, makeGeminiExtractor, modelChain } from "../engine/gemini";
+import { getExtractor, makeGeminiExtractor, modelChain, withQuickCommands } from "../engine/gemini";
 
 const TODAY = "2026-10-25";
 const demo = readFileSync(join(process.cwd(), "public/samples/demo_chat.txt"), "utf8");
@@ -178,6 +178,21 @@ describe("gemini extractor", () => {
     const conv = new Conversation(makeGeminiExtractor(async () => { throw new Error("down"); }, chain("t-fail-conv")), TODAY);
     expect(await conv.turn("hi")).toContain("Nothing was changed");
     expect(conv.shipment.pallets).toBeNull();
+  });
+});
+
+describe("quick commands", () => {
+  it("answers short control messages without calling the model, and passes everything else through", async () => {
+    let calls = 0;
+    const ex = withQuickCommands(async () => { calls++; return [{ op: "set", field: "pallets", value: "9" }]; });
+    expect(await ex("add a pallet", snap(), TODAY)).toEqual([{ op: "increment", field: "pallets", value: "1" }]);
+    expect(await ex("confirm", snap({ phase: "confirming" }), TODAY)).toEqual([{ op: "confirm" }]);
+    expect(await ex("unchanged", snap({ stale: ["total_cartons"] }), TODAY)).toEqual([{ op: "keep", field: "total_cartons" }]);
+    expect(await ex("4", snap({ asking: ["How many pallets?"] }), TODAY)).toEqual([{ op: "set", field: "pallets", value: "4" }]);
+    expect(calls).toBe(0);
+    await ex("make it 3 pallets please", snap(), TODAY); // not a recognised command: the model decides
+    await ex("pallets: 2\ncountry: Germany", snap(), TODAY); // multi-line: the model decides
+    expect(calls).toBe(2);
   });
 });
 

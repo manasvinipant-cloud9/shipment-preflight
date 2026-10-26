@@ -26,8 +26,8 @@ export function exampleNl(today: string): string {
   const [y, m, d] = addDays(today, 14).split("-").map(Number);
   const month = new Date(Date.UTC(y, m - 1, d)).toLocaleString("en-GB", { month: "long", timeZone: "UTC" });
   return "I need to send 2 pallets of ceramic mugs from Manchester to a warehouse in Frankfurt, ready on " +
-    `${d} ${month} ${y}. 520 kg in total and 30 cartons. It's 1080 mugs at £5 each, 12 per carton, 0.5 kg each, ` +
-    "HS code 691200, made in the UK. Declared value £5,400, appointment already booked. Balanced please.";
+    `${d} ${month} ${y}. 620 kg in total and 90 cartons. It's 1080 mugs (90 cartons of 12) at £5 each, ` +
+    "0.5 kg each, HS code 691200, made in the UK. Declared value £5,400, appointment already booked. Balanced please.";
 }
 
 export const EXAMPLE_MISTAKES = `seller: Volt & Spark
